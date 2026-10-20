@@ -74,7 +74,11 @@ function activate(context) {
         'javascriptreact',
         'csharp',
         'go',
-        'rust'
+        'rust',
+        'dockerfile',
+        'yaml',
+        'sql',
+        'properties'
     ];
     const codeActionProvider = new CodeActionProvider_1.DidacticCodeActionProvider();
     for (const langId of supportedLanguages) {

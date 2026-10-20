@@ -39,6 +39,30 @@ exports.CATEGORIES = [
         description: 'Classes, structs, interfaces/traits, construtores e herança/composição.'
     },
     {
+        id: 'framework_web',
+        label: 'Web & APIs (Spring)',
+        icon: 'globe',
+        description: 'Controladores REST, injeção de dependências, DTOs e validação.'
+    },
+    {
+        id: 'database_sql',
+        label: 'Banco de Dados & JPA',
+        icon: 'database',
+        description: 'Consultas SQL, JOINs, índices, transações ACID e Spring Data JPA.'
+    },
+    {
+        id: 'devops_containers',
+        label: 'Docker & DevOps',
+        icon: 'package',
+        description: 'Dockerfile multi-stage, Docker Compose, imagens leves e CLI.'
+    },
+    {
+        id: 'git_workflow',
+        label: 'Git & Versionamento',
+        icon: 'git-branch',
+        description: 'Rebase vs Merge, Stash, Cherry-pick, Undo e Conventional Commits.'
+    },
+    {
         id: 'error_handling',
         label: 'Tratamento de Erros',
         icon: 'warning',

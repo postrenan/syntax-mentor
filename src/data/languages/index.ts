@@ -1,5 +1,9 @@
 import { LanguageDefinition } from '../../types';
 import { javaDefinition } from './java';
+import { springBootDefinition } from './springboot';
+import { dockerDefinition } from './docker';
+import { sqlDefinition } from './sql';
+import { gitDefinition } from './git';
 import { pythonDefinition } from './python';
 import { typescriptDefinition } from './typescript';
 import { csharpDefinition } from './csharp';
@@ -8,6 +12,10 @@ import { rustDefinition } from './rust';
 
 export const ALL_LANGUAGES: LanguageDefinition[] = [
   javaDefinition,
+  springBootDefinition,
+  dockerDefinition,
+  sqlDefinition,
+  gitDefinition,
   pythonDefinition,
   typescriptDefinition,
   csharpDefinition,
@@ -28,6 +36,6 @@ export function getLanguageByVsCodeId(vscodeLangId: string): LanguageDefinition 
 export function getLanguageByFilename(filename: string): LanguageDefinition | undefined {
   const lower = filename.toLowerCase();
   return ALL_LANGUAGES.find(lang =>
-    lang.fileExtensions.some(ext => lower.endsWith(ext))
+    lang.fileExtensions.some(ext => lower.endsWith(ext) || lower.includes(ext))
   );
 }

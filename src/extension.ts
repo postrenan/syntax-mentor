@@ -56,7 +56,11 @@ export function activate(context: vscode.ExtensionContext) {
     'javascriptreact',
     'csharp',
     'go',
-    'rust'
+    'rust',
+    'dockerfile',
+    'yaml',
+    'sql',
+    'properties'
   ];
 
   const codeActionProvider = new DidacticCodeActionProvider();

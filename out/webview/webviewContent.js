@@ -334,13 +334,35 @@ function getSidebarHtml(currentLangId) {
       white-space: pre;
     }
 
-    /* Syntax Highlighting Colors */
-    .hl-kw { color: #569cd6; font-weight: bold; }
-    .hl-type { color: #4ec9b0; }
-    .hl-str { color: #ce9178; }
-    .hl-num { color: #b5cea8; }
-    .hl-com { color: #6a9955; font-style: italic; }
-    .hl-fn { color: #dcdcaa; }
+    /* ========================================================
+       ADVANCED SYNTAX HIGHLIGHTING (High-Contrast Theme Palette)
+       ======================================================== */
+    /* 1. Controle de Fluxo & Saltos (Magenta / Roxo) */
+    .hl-ctrl { color: #c586c0 !important; font-weight: 600; }
+
+    /* 2. Declarações, Modificadores & Palavras Reservadas Estruturais (Azul) */
+    .hl-decl { color: #569cd6 !important; font-weight: 600; }
+
+    /* 3. Tipos Primitivos, Classes & Interfaces (Verde-Água / Teal) */
+    .hl-type { color: #4ec9b0 !important; }
+
+    /* 4. Anotações & Decorators de Frameworks (Dourado / Mostarda) */
+    .hl-anno { color: #e5c07b !important; font-weight: 500; }
+
+    /* 5. Strings, Literais de Texto & F-Strings (Laranja Terracota) */
+    .hl-str { color: #ce9178 !important; }
+
+    /* 6. Números Inteiros & Decimais (Verde Claro Menta) */
+    .hl-num { color: #b5cea8 !important; }
+
+    /* 7. Comentários (Verde Floresta / Itálico) */
+    .hl-com { color: #6a9955 !important; font-style: italic; }
+
+    /* 8. Instruções Docker & SQL (Ciano Vibrante) */
+    .hl-dock-sql { color: #4fc1ff !important; font-weight: 700; letter-spacing: 0.3px; }
+
+    /* 9. Nomes de Funções e Chamadas (Amarelo Claro) */
+    .hl-fn { color: #dcdcaa !important; }
 
     /* Checklist & Warnings */
     .section-title {
@@ -426,7 +448,7 @@ function getSidebarHtml(currentLangId) {
       </button>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: string, array, stream, loop)..." />
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: spring, docker, join, string)..." />
 
     <div class="stats-bar">
       <span id="topicCountPill">Carregando tópicos...</span>
@@ -451,7 +473,6 @@ function getSidebarHtml(currentLangId) {
     let currentLanguageId = "${currentLang.id}";
     let activeCategory = "all";
     let searchQuery = "";
-    // State of snippet active tab: snippetId -> "good" | "bad"
     const activeTabs = new Map();
 
     const langSelect = document.getElementById("langSelect");
@@ -498,23 +519,38 @@ function getSidebarHtml(currentLangId) {
         .replace(/'/g, "&#039;");
     }
 
-    // Lightweight client-side syntax highlighter
+    // High-contrast, semantic multi-token highlighter
     function highlightCode(code) {
       if (!code) return "";
       let html = escapeHtml(code);
 
-      // Comments
-      html = html.replace(/(\\/{2}.*?$|#.*?$)/gm, '<span class="hl-com">$1</span>');
-      // Strings
+      // 1. Comments (Line comments: //, #, --)
+      html = html.replace(/(\\/{2}.*?$|#.*?$|--.*?$)/gm, '<span class="hl-com">$1</span>');
+
+      // 2. Strings & Characters (aspas duplas, simples e crases)
       html = html.replace(/(&quot;[\\s\\S]*?&quot;|&#039;[\\s\\S]*?&#039;|\\x60[\\s\\S]*?\\x60)/g, '<span class="hl-str">$1</span>');
-      // Numbers
-      html = html.replace(/\\b(\\d+(?:\\.\\d+)?(?:[fLmd])?)\\b/g, '<span class="hl-num">$1</span>');
-      // Keywords
-      const keywords = "\\b(public|private|protected|static|final|class|record|interface|enum|void|return|new|import|package|def|fn|func|let|const|var|mut|struct|impl|match|case|switch|if|else|for|while|try|catch|finally|throw|throws|async|await|select)\\b";
-      html = html.replace(new RegExp(keywords, "g"), '<span class="hl-kw">$1</span>');
-      // Common Types
-      const types = "\\b(String|StringBuilder|List|ArrayList|Map|HashMap|Set|HashSet|Integer|Double|Boolean|Task|Promise|Vec|Option|Result|int|double|boolean|char|byte|long|float)\\b";
+
+      // 3. Annotations & Decorators (@RestController, @GetMapping, @Autowired, @Entity, @Override, etc.)
+      html = html.replace(/(@[a-zA-Z0-9_]+)/g, '<span class="hl-anno">$1</span>');
+
+      // 4. Docker & SQL Directives (FROM, WORKDIR, COPY, RUN, SELECT, JOIN, WHERE, etc.)
+      const dockerSql = "\\b(FROM|WORKDIR|COPY|RUN|EXPOSE|ENTRYPOINT|CMD|ENV|VOLUME|USER|ARG|HEALTHCHECK|SELECT|INSERT|INTO|UPDATE|DELETE|SET|WHERE|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|ON|GROUP BY|ORDER BY|HAVING|LIMIT|OFFSET|BEGIN|COMMIT|ROLLBACK|TRANSACTION|CREATE|TABLE|INDEX|UNIQUE|DROP|ALTER|EXPLAIN|ANALYZE)\\b";
+      html = html.replace(new RegExp(dockerSql, "g"), '<span class="hl-dock-sql">$1</span>');
+
+      // 5. Controle de Fluxo & Saltos (if, else, for, while, return, try, catch, etc.)
+      const controlFlow = "\\b(if|else|switch|case|default|for|while|do|break|continue|return|throw|throws|try|catch|finally|yield|match|async|await)\\b";
+      html = html.replace(new RegExp(controlFlow, "g"), '<span class="hl-ctrl">$1</span>');
+
+      // 6. Declarações & Modificadores Estruturais (public, class, new, def, fn, etc.)
+      const declarations = "\\b(public|private|protected|static|final|abstract|class|record|interface|enum|extends|implements|new|import|package|def|fn|func|var|let|const|mut|struct|impl|trait|type|namespace|using|services|networks|volumes)\\b";
+      html = html.replace(new RegExp(declarations, "g"), '<span class="hl-decl">$1</span>');
+
+      // 7. Tipos Primitivos, Classes & Interfaces
+      const types = "\\b(String|StringBuilder|List|ArrayList|Map|HashMap|Set|HashSet|Integer|Double|Boolean|Long|Optional|ResponseEntity|ProblemDetail|UUID|JpaRepository|Task|Promise|Vec|Result|Option|int|double|boolean|char|byte|long|float|void)\\b";
       html = html.replace(new RegExp(types, "g"), '<span class="hl-type">$1</span>');
+
+      // 8. Números
+      html = html.replace(/\\b(\\d+(?:\\.\\d+)?(?:[fLmd])?)\\b/g, '<span class="hl-num">$1</span>');
 
       return html;
     }
