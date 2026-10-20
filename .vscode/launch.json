@@ -3,8 +3,9 @@
   "configurations": [
     {
       "name": "Run Extension (Syntax Mentor)",
-      "type": "extensionDevelopmentHost",
+      "type": "extensionHost",
       "request": "launch",
+      "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
@@ -15,8 +16,9 @@
     },
     {
       "name": "Run Extension (Direct / No Watch)",
-      "type": "extensionDevelopmentHost",
+      "type": "extensionHost",
       "request": "launch",
+      "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
