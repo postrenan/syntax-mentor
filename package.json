@@ -1,0 +1,88 @@
+{
+  "name": "syntax-mentor",
+  "displayName": "Syntax Mentor: Guia Didático & Completador Inteligente",
+  "description": "Seletor de linguagens com sintaxe didática detalhada (Strings, Arrays, POO, etc.) e autocompletador/analisador em tempo real.",
+  "version": "1.0.0",
+  "publisher": "syntax-mentor",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Education",
+    "Other"
+  ],
+  "keywords": [
+    "syntax",
+    "cheat sheet",
+    "java",
+    "python",
+    "typescript",
+    "csharp",
+    "go",
+    "rust",
+    "didactic",
+    "autocomplete"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "syntax-mentor-container",
+          "title": "Syntax Mentor",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "syntax-mentor-container": [
+        {
+          "type": "webview",
+          "id": "syntax-mentor.sidebarView",
+          "name": "Guia de Sintaxe Didático"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "syntax-mentor.openGuide",
+        "title": "Syntax Mentor: Abrir Guia de Sintaxe",
+        "category": "Syntax Mentor"
+      },
+      {
+        "command": "syntax-mentor.selectLanguage",
+        "title": "Syntax Mentor: Selecionar Linguagem",
+        "category": "Syntax Mentor"
+      },
+      {
+        "command": "syntax-mentor.insertSnippet",
+        "title": "Syntax Mentor: Inserir Snippet Didático no Editor",
+        "category": "Syntax Mentor"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "syntax-mentor.selectLanguage",
+          "when": "view == syntax-mentor.sidebarView",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  }
+}
