@@ -1,106 +1,81 @@
-# 📘 Syntax Mentor: Guia Didático de Sintaxe & Autocompletador em Tempo Real
+# 📘 Syntax Mentor: Guia Didático de Sintaxe, Autocompletador & Tradutor Poliglota
 
-Uma extensão profissional para o **Visual Studio Code** desenvolvida para acelerar o aprendizado e a produtividade em múltiplas linguagens de programação. Ela reúne um **guia didático interativo na barra lateral** e um **analisador de autocompletar em tempo real** diretamente no editor.
+Uma extensão profissional para o **Visual Studio Code** desenvolvida para acelerar o aprendizado, a produtividade e a transição entre diferentes linguagens e tecnologias. Ela reúne um **guia didático interativo na barra lateral**, um **analisador em tempo real com Quick Fixes**, um **tradutor poliglota de código** e suporte a **criação de tips personalizados**.
 
 ---
 
 ## 🌟 Funcionalidades Principais
 
-### 1. Seletor de Linguagens & Catálogo Didático na Barra Lateral
-- **Multilinguagem Completo:** Suporte aprofundado para **Java**, **Python**, **TypeScript / JavaScript**, **C# (.NET)**, **Go (Golang)** e **Rust**.
-- **Sintaxe Além do Básico:**
-  - **Strings & Texto:** Como cada linguagem trata imutabilidade, memória (String Pool no Java, heap vs `&str` no Rust, fatias de bytes UTF-8 no Go), concatenação eficiente (`StringBuilder`, `strings.Builder`), interpolações (`f-strings`, template literals, raw strings `"""`).
-  - **Arrays & Coleções:** Diferença fundamental entre arrays estáticos contíguos e coleções dinâmicas (`ArrayList`, slices, vectors, maps, list comprehensions, Streams API, LINQ).
-  - **Tipos & Memória:** Primitivos vs Wrappers, inferência com `var`, Dataclasses, Records, Ownership & Borrowing no Rust.
-  - **Controle de Fluxo:** Pattern Matching moderno, Switch Expressions com flecha (`->`), `match-case`.
-  - **Tratamento de Erros:** Filosofia de exceções checadas, Try-with-Resources com `AutoCloseable`, padrão EAFP, retorno de erros idiomático (`if err != nil` em Go) e o operador `?` com `Result<T, E>` no Rust.
-  - **Concorrência & Assincronia:** CompletableFuture & Virtual Threads no Java 21, corrotinas com `asyncio`, Promises concorrentes com `Promise.allSettled`, Tasks com `CancellationToken`, Goroutines & Canais.
+### 1. Seletor de Linguagens & Tecnologias
+- **Multilinguagem Abrangente:** Suporte aprofundado para:
+  - **Java (JDK 17/21+)**
+  - **Spring Boot 3** (REST, Injeção por Construtor, Spring Data JPA, Global Exception Handling)
+  - **Docker & Compose** (Dockerfile Multi-Stage leve, Compose App+Postgres+Redis, CLI)
+  - **SQL & Banco de Dados** (JOINs visuais, Índices B-Tree, Transações ACID)
+  - **Git & DevOps** (Rebase vs Merge, Stash, Conventional Commits, Desfazer Erros)
+  - **Python** (F-strings, Lists & Comprehensions, Asyncio, Pattern Matching)
+  - **TypeScript / JavaScript** (Generics, Utility Types, Async/Await, Métodos Funcionais)
+  - **C# (.NET 8+)** (LINQ, Relational Pattern Matching, Raw Strings, Tasks)
+  - **Go (Golang)** (Slices, Maps Comma-Ok, Goroutines & Channels CSP)
+  - **Rust** (Ownership & Borrowing, String vs &str, Iterators, Result com ?)
 
-### 2. Painel Webview Interativo
-- **Busca em Tempo Real:** Filtre instantaneamente por tópicos, termos (ex: `string`, `array`, `loop`, `builder`, `pool`) ou explicações.
-- **Abas de Categorias:** Navegue rapidamente por *Tipos & Variáveis*, *Strings*, *Arrays & Coleções*, *Controle de Fluxo*, *POO & Estruturas*, *Tratamento de Erros* e *Assíncrono*.
-- **Inserção Direta no Editor:** Botão **"⚡ Inserir no Editor"** que injeta o exemplo pronto e comentado diretamente na posição atual do seu cursor.
-- **Área de Transferência:** Botão **"📋 Copiar"** com feedback instantâneo.
-- **Boas Práticas & Armadilhas:** Checklist de convenções ideais e alertas sobre pegadinhas comuns (ex: nunca comparar Strings com `==` em Java).
-- **Sincronização com o Editor Ativo:** Ao abrir ou trocar para um arquivo `.java`, `.py`, `.ts`, `.cs`, `.go` ou `.rs`, o painel pode sincronizar automaticamente.
+### 2. Tags e Categorias Dinâmicas & Contextuais
+- Ao selecionar uma linguagem, apenas as tags relevantes para ela são exibidas.
+  - Ao selecionar **SQL**, exibe apenas *Banco de Dados & JPA* (oculta POO, Strings, etc.).
+  - Ao selecionar **Git**, exibe apenas *Git & Versionamento*.
 
-### 3. Analisador e Autocompletador em Tempo Real (`CompletionItemProvider`)
-- Enquanto você digita no editor de código:
-  - Digite prefixos diretos como `java-string-pool`, `java-string-builder`, `py-list-comprehension`, `ts-array-functional`, `go-slice-ops` ou `rust-ownership-rules`.
-  - Digite palavras-chave como `string`, `array`, `stream`, `map` ou `mentor-` para receber sugestões de código prontas.
-  - O painel de documentação do autocompletar exibe a explicação didática completa, exemplo com syntax highlight, boas práticas e avisos.
+### 3. Cards Retráteis (Iniciam Fechados) & Fixar no Topo (Pinning)
+- **Modo Enxuto:** Todos os cards iniciam **fechados** por padrão para uma navegação limpa, com botão para expandir/recolher todos.
+- **Fixar no Topo (📌):** Fixe seus conceitos e snippets mais importantes no topo da lista. O estado de fixação é persistido permanentemente no VS Code.
 
-### 4. Guia Didático por Hover (`HoverProvider`)
-- Passe o mouse sobre tipos ou conceitos no seu código (ex: `String`, `StringBuilder`, `ArrayList`, `Stream`, `record`, `goroutine`, `slice`) para ver uma janela explicativa com botão de inserir exemplo.
+### 4. Criação de Tips Personalizados pelo Usuário (⭐ Meu Tip)
+- Crie e salve seus próprios snippets e anotações didáticas com formulário integrado (`➕ Criar Tip`).
+- Seus tips personalizados integram-se automaticamente ao **IntelliSense de autocompletar e ao Hover do editor de código**!
+
+### 5. 🔄 Tradutor de Código Poliglota (Code Transcriber)
+- Escreva ou cole código na linguagem que você já domina (ex: Python) e transcreva-o instantaneamente para a linguagem objetivo (ex: Java, TypeScript, C#, Go ou Rust).
+- Acompanha **notas didáticas comparativas** explicando as diferenças de tipagem, controle de fluxo e convenções entre as linguagens.
+- Botão **`📥 Do Editor`** para puxar o código selecionado diretamente do arquivo ativo no VS Code.
+
+### 6. Analisador em Tempo Real com Quick Fixes (Lâmpada 💡)
+- Detecta anti-padrões enquanto você digita no editor:
+  - **Java:** Alerta sobre comparação de Strings com `==` e blocos catch vazios, oferecendo Quick Fix automático (`Ctrl + .`).
+  - **Python:** Alerta sobre `== None`, `except:` genérico e `range(len(...))`.
+  - **TypeScript:** Alerta sobre igualdade solta `==` e uso de `any`.
 
 ---
 
 ## 🚀 Como Executar e Testar a Extensão no VS Code
 
-1. Abra esta pasta no VS Code:
+1. Clone o repositório:
    ```bash
-   code C:\Users\renan\.gemini\antigravity\scratch\syntax-mentor
+   git clone https://github.com/postrenan/syntax-mentor.git
+   cd syntax-mentor
    ```
 
-2. Pressione a tecla **`F5`** (ou vá em **Run and Debug** -> **Run Extension (Syntax Mentor)**).
-   - Uma nova janela intitulada **`[Extension Development Host]`** será aberta com a extensão carregada.
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
 
-3. Na barra lateral esquerda (Activity Bar), clique no ícone do **Syntax Mentor** (ícone de livro com código `</>`).
+3. Pressione **`F5`** no VS Code para abrir a janela `[Extension Development Host]`.
 
-4. Selecione a linguagem desejada no menu dropdown (ex: **Java**).
-   - Explore as categorias: clique em **Strings & Formatação** ou **Arrays & Coleções**.
-   - Abra um novo arquivo `Teste.java` no editor.
-   - Clique em **"⚡ Inserir no Editor"** em qualquer cartão didático para ver o código sendo inserido em tempo real!
-   - No editor, digite `java-string` ou `mentor-` e pressione `Ctrl + Espaço` para ver o autocompletador didático em ação.
+4. Na Activity Bar à esquerda, clique no ícone **Syntax Mentor** (livro com `</>`).
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📦 Como Instalar Diretamente o Pacote `.vsix`
 
+Se preferir instalar diretamente no seu VS Code do dia a dia:
+
+```powershell
+code --install-extension syntax-mentor-1.0.0.vsix
 ```
-syntax-mentor/
-├── .vscode/
-│   ├── launch.json              # Configuração para rodar com F5 no VS Code
-│   └── tasks.json               # Tarefa de build contínuo (watch)
-├── resources/
-│   └── icon.svg                 # Ícone da extensão na barra lateral
-├── src/
-│   ├── data/
-│   │   └── languages/
-│   │       ├── index.ts         # Registro central e buscas por linguagem/extensão
-│   │       ├── java.ts          # Base didática Java (Strings, Arrays, Records, etc.)
-│   │       ├── python.ts        # Base didática Python (F-strings, Lists, Asyncio, etc.)
-│   │       ├── typescript.ts    # Base didática TypeScript (Generics, Functional, etc.)
-│   │       ├── csharp.ts        # Base didática C# (LINQ, Pattern Matching, Raw Strings)
-│   │       ├── go.ts            # Base didática Go (Slices, Maps Comma-Ok, Goroutines)
-│   │       └── rust.ts          # Base didática Rust (String vs &str, Vec, Ownership)
-│   ├── providers/
-│   │   ├── HoverProvider.ts     # Exibe explicações ao passar o mouse sobre palavras-chave
-│   │   ├── RealTimeCompletionProvider.ts # Autocompletador e analisador didático
-│   │   └── SidebarWebviewProvider.ts     # Provedor do painel Webview na barra lateral
-│   ├── webview/
-│   │   └── webviewContent.ts    # Interface HTML/CSS/JS moderna integrada ao tema
-│   ├── extension.ts             # Ponto de entrada e ativação da extensão
-│   └── types.ts                 # Tipagens e interfaces TypeScript
-├── package.json                 # Manifesto da extensão VS Code
-├── tsconfig.json                # Configuração do TypeScript
-└── README.md                    # Documentação do projeto
-```
+
+Ou no VS Code, abra o painel de Extensões (`Ctrl + Shift + X`) -> clique no menu `...` -> **"Install from VSIX..."** e selecione o arquivo `syntax-mentor-1.0.0.vsix`.
 
 ---
 
-## 📦 Como Gerar o Pacote `.vsix` para Instalação Permanente
+## 📄 Licença
 
-Caso queira instalar a extensão diretamente no seu VS Code do dia a dia sem precisar do modo de desenvolvimento:
-
-1. Instale o empacotador oficial do VS Code (caso não tenha):
-   ```bash
-   npm install -g @vscode/vsce
-   ```
-
-2. Gere o pacote `.vsix`:
-   ```bash
-   npx @vscode/vsce package
-   ```
-
-3. No VS Code, abra o painel de Extensões (`Ctrl + Shift + X`), clique no menu `...` (canto superior direito) e selecione **"Install from VSIX..."**, escolhendo o arquivo `.vsix` gerado.
+Distribuído sob a licença [MIT](LICENSE).
