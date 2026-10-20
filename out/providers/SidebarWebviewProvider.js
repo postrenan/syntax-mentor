@@ -37,6 +37,7 @@ exports.SidebarWebviewProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const languages_1 = require("../data/languages");
 const CustomTipsManager_1 = require("../data/CustomTipsManager");
+const CodeTranslator_1 = require("../translator/CodeTranslator");
 const webviewContent_1 = require("../webview/webviewContent");
 class SidebarWebviewProvider {
     _extensionUri;
@@ -105,6 +106,34 @@ class SidebarWebviewProvider {
                     }
                     break;
                 }
+                case 'translateCode': {
+                    const result = CodeTranslator_1.CodeTranslator.translate(data.sourceCode, data.fromLang, data.toLang);
+                    this._view?.webview.postMessage({
+                        command: 'translationResult',
+                        result: result
+                    });
+                    break;
+                }
+                case 'pullEditorSelection': {
+                    const editor = vscode.window.activeTextEditor;
+                    if (editor) {
+                        const selectionText = editor.document.getText(editor.selection);
+                        const detectedLang = (0, languages_1.getLanguageByVsCodeId)(editor.document.languageId) ||
+                            (0, languages_1.getLanguageByFilename)(editor.document.fileName);
+                        this._view?.webview.postMessage({
+                            command: 'setEditorSelection',
+                            text: selectionText || editor.document.getText(), // Selection or full file if empty
+                            languageId: detectedLang ? detectedLang.id : undefined
+                        });
+                        if (!selectionText) {
+                            vscode.window.showInformationMessage('Como não havia texto selecionado, o arquivo inteiro foi carregado no tradutor.');
+                        }
+                    }
+                    else {
+                        vscode.window.showWarningMessage('Nenhum editor de texto ativo no momento.');
+                    }
+                    break;
+                }
             }
         });
     }
@@ -157,7 +186,7 @@ class SidebarWebviewProvider {
             }
         });
         if (success) {
-            vscode.window.showInformationMessage(title ? `Snippet "${title}" inserido com sucesso!` : 'Código inserido com sucesso!');
+            vscode.window.showInformationMessage(title ? `Código "${title}" inserido com sucesso!` : 'Código inserido no editor!');
         }
     }
 }

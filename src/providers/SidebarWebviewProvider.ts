@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getLanguageByFilename, getLanguageById, getLanguageByVsCodeId } from '../data/languages';
 import { CustomTipsManager } from '../data/CustomTipsManager';
+import { CodeTranslator } from '../translator/CodeTranslator';
 import { getSidebarHtml } from '../webview/webviewContent';
 
 export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
@@ -83,6 +84,35 @@ export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
           }
           break;
         }
+        case 'translateCode': {
+          const result = CodeTranslator.translate(data.sourceCode, data.fromLang, data.toLang);
+          this._view?.webview.postMessage({
+            command: 'translationResult',
+            result: result
+          });
+          break;
+        }
+        case 'pullEditorSelection': {
+          const editor = vscode.window.activeTextEditor;
+          if (editor) {
+            const selectionText = editor.document.getText(editor.selection);
+            const detectedLang = getLanguageByVsCodeId(editor.document.languageId) ||
+                                 getLanguageByFilename(editor.document.fileName);
+
+            this._view?.webview.postMessage({
+              command: 'setEditorSelection',
+              text: selectionText || editor.document.getText(), // Selection or full file if empty
+              languageId: detectedLang ? detectedLang.id : undefined
+            });
+
+            if (!selectionText) {
+              vscode.window.showInformationMessage('Como não havia texto selecionado, o arquivo inteiro foi carregado no tradutor.');
+            }
+          } else {
+            vscode.window.showWarningMessage('Nenhum editor de texto ativo no momento.');
+          }
+          break;
+        }
       }
     });
   }
@@ -146,7 +176,7 @@ export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
 
     if (success) {
       vscode.window.showInformationMessage(
-        title ? `Snippet "${title}" inserido com sucesso!` : 'Código inserido com sucesso!'
+        title ? `Código "${title}" inserido com sucesso!` : 'Código inserido no editor!'
       );
     }
   }

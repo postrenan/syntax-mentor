@@ -36,16 +36,64 @@ export function getSidebarHtml(
       font-size: 13px;
       color: var(--vscode-editor-foreground);
       background-color: var(--vscode-sideBar-background, var(--vscode-editor-background));
-      padding: 12px;
+      padding: 10px;
       line-height: 1.5;
     }
 
-    /* Top Controls */
-    .header-bar {
+    /* Main Navigation Mode Tabs (Guia vs Tradutor) */
+    .mode-nav-tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 3px;
+      border-radius: 6px;
       margin-bottom: 12px;
+      border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+    }
+
+    .mode-tab-btn {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .mode-tab-btn.active {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Views */
+    .view-panel {
+      display: none;
+    }
+    .view-panel.active {
+      display: block;
+      animation: fadeIn 0.15s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top Controls (Guia View) */
+    .header-bar {
+      margin-bottom: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .selector-row {
@@ -111,7 +159,7 @@ export function getSidebarHtml(
       border-color: var(--vscode-focusBorder);
     }
 
-    /* Controls Bar: Collapse all toggle + Stats */
+    /* Sub-bar */
     .sub-bar {
       display: flex;
       justify-content: space-between;
@@ -187,11 +235,6 @@ export function getSidebarHtml(
     .custom-modal.visible {
       display: block;
       animation: fadeIn 0.2s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .modal-title {
@@ -462,7 +505,7 @@ export function getSidebarHtml(
       margin-bottom: 12px;
     }
 
-    /* Code View Tabs (Idiomático vs Anti-padrão) */
+    /* Code View Tabs */
     .code-tabs {
       display: flex;
       border-bottom: 1px solid var(--vscode-panel-border, #333);
@@ -626,6 +669,135 @@ export function getSidebarHtml(
       font-size: 11px;
     }
 
+    /* ========================================================
+       TRANSLATOR VIEW STYLES
+       ======================================================== */
+    .translator-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+      background: var(--vscode-editor-background);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--vscode-panel-border, rgba(128,128,128,0.2));
+    }
+
+    .lang-pair-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .lang-pair-select {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 4px;
+      background: var(--vscode-dropdown-background);
+      color: var(--vscode-dropdown-foreground);
+      border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border));
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .btn-swap-langs {
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: var(--vscode-button-secondaryBackground, #3a3d41);
+      color: var(--vscode-button-secondaryForeground, #ffffff);
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .translator-actions-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .preset-select {
+      flex: 1;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: var(--vscode-dropdown-background);
+      color: var(--vscode-dropdown-foreground);
+      border: 1px solid var(--vscode-dropdown-border);
+      font-size: 11.5px;
+      outline: none;
+    }
+
+    .translator-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px;
+      border-radius: 6px;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      font-family: var(--code-font);
+      font-size: 12px;
+      line-height: 1.45;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    .translator-textarea:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+
+    .btn-translate-now {
+      width: 100%;
+      padding: 9px;
+      font-size: 12.5px;
+      font-weight: bold;
+      border-radius: 6px;
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: filter 0.15s;
+    }
+
+    .btn-translate-now:hover {
+      filter: brightness(1.15);
+    }
+
+    .translation-output-box {
+      display: none;
+      margin-top: 14px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .translation-output-box.visible {
+      display: block;
+    }
+
+    .notes-box {
+      background: rgba(127, 127, 127, 0.08);
+      border-left: 3px solid #e5c07b;
+      padding: 10px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .notes-box ul {
+      margin-left: 16px;
+      margin-top: 4px;
+    }
+
+    .notes-box li {
+      margin-bottom: 3px;
+    }
+
     .empty-state {
       text-align: center;
       padding: 40px 15px;
@@ -634,107 +806,194 @@ export function getSidebarHtml(
   </style>
 </head>
 <body>
-  <div class="header-bar">
-    <div class="selector-row">
-      <select id="langSelect" class="lang-select">
-        ${ALL_LANGUAGES.map(lang => `
-          <option value="${lang.id}" ${lang.id === currentLang.id ? 'selected' : ''}>
-            ${lang.name} (${lang.badge})
-          </option>
-        `).join('')}
-      </select>
-      <button id="btnOpenNewTipModal" class="btn-action-top btn-create-tip" title="Criar meu próprio tip para esta linguagem">
-        ➕ Criar Tip
-      </button>
-      <button id="btnCreateTest" class="btn-action-top" title="Criar arquivo de rascunho para testar">
-        📄 Testar
-      </button>
-    </div>
-
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: spring, string, array, erro)..." />
-
-    <div class="sub-bar">
-      <span id="topicCountPill">Carregando tópicos...</span>
-      <button id="btnToggleAll" class="btn-toggle-all">🔽 Expandir Todos</button>
-    </div>
+  <!-- Top View Mode Tabs -->
+  <div class="mode-nav-tabs">
+    <button id="btnTabGuide" class="mode-tab-btn active">
+      📚 Guia de Sintaxe
+    </button>
+    <button id="btnTabTranslator" class="mode-tab-btn">
+      🔄 Tradutor de Código
+    </button>
   </div>
 
-  <!-- Form Modal: Criar Novo Tip Personalizado -->
-  <div id="customTipModal" class="custom-modal">
-    <div class="modal-title">
-      <span>➕ Novo Tip Personalizado</span>
-      <button type="button" id="btnCloseModal" style="background:transparent; border:none; color:var(--vscode-descriptionForeground); cursor:pointer; font-size:16px;">✕</button>
+  <!-- ==========================================
+       VIEW 1: GUIA DE SINTAXE DIDÁTICO
+       ========================================== -->
+  <div id="viewGuide" class="view-panel active">
+    <div class="header-bar">
+      <div class="selector-row">
+        <select id="langSelect" class="lang-select">
+          ${ALL_LANGUAGES.map(lang => `
+            <option value="${lang.id}" ${lang.id === currentLang.id ? 'selected' : ''}>
+              ${lang.name} (${lang.badge})
+            </option>
+          `).join('')}
+        </select>
+        <button id="btnOpenNewTipModal" class="btn-action-top btn-create-tip" title="Criar meu próprio tip para esta linguagem">
+          ➕ Criar Tip
+        </button>
+        <button id="btnCreateTest" class="btn-action-top" title="Criar arquivo de rascunho para testar">
+          📄 Testar
+        </button>
+      </div>
+
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: spring, string, array, erro)..." />
+
+      <div class="sub-bar">
+        <span id="topicCountPill">Carregando tópicos...</span>
+        <button id="btnToggleAll" class="btn-toggle-all">🔽 Expandir Todos</button>
+      </div>
     </div>
 
-    <form id="customTipForm">
-      <div class="form-group">
-        <label>Título do Conceito / Tip:</label>
-        <input type="text" id="tipTitle" class="form-input" placeholder="Ex: Utilitário de Data com LocalDate" required />
+    <!-- Form Modal: Criar Novo Tip Personalizado -->
+    <div id="customTipModal" class="custom-modal">
+      <div class="modal-title">
+        <span>➕ Novo Tip Personalizado</span>
+        <button type="button" id="btnCloseModal" style="background:transparent; border:none; color:var(--vscode-descriptionForeground); cursor:pointer; font-size:16px;">✕</button>
       </div>
 
-      <div style="display:flex; gap:8px;">
-        <div class="form-group" style="flex:1;">
-          <label>Categoria:</label>
-          <select id="tipCategory" class="form-select">
-            ${CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
-          </select>
+      <form id="customTipForm">
+        <div class="form-group">
+          <label>Título do Conceito / Tip:</label>
+          <input type="text" id="tipTitle" class="form-input" placeholder="Ex: Utilitário de Data com LocalDate" required />
         </div>
 
-        <div class="form-group" style="flex:1;">
-          <label>Nível de Dificuldade:</label>
-          <select id="tipLevel" class="form-select">
-            <option value="Iniciante">Iniciante</option>
-            <option value="Intermediário" selected>Intermediário</option>
-            <option value="Avançado">Avançado</option>
-          </select>
+        <div style="display:flex; gap:8px;">
+          <div class="form-group" style="flex:1;">
+            <label>Categoria:</label>
+            <select id="tipCategory" class="form-select"></select>
+          </div>
+
+          <div class="form-group" style="flex:1;">
+            <label>Nível de Dificuldade:</label>
+            <select id="tipLevel" class="form-select">
+              <option value="Iniciante">Iniciante</option>
+              <option value="Intermediário" selected>Intermediário</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Resumo Curto:</label>
-        <input type="text" id="tipSummary" class="form-input" placeholder="Breve resumo em uma frase" required />
-      </div>
+        <div class="form-group">
+          <label>Resumo Curto:</label>
+          <input type="text" id="tipSummary" class="form-input" placeholder="Breve resumo em uma frase" required />
+        </div>
 
-      <div class="form-group">
-        <label>Explicação Didática:</label>
-        <textarea id="tipExplanation" class="form-textarea" placeholder="Explique como e por que usar este padrão..." required></textarea>
-      </div>
+        <div class="form-group">
+          <label>Explicação Didática:</label>
+          <textarea id="tipExplanation" class="form-textarea" placeholder="Explique como e por que usar este padrão..." required></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>Código Recomendado:</label>
-        <textarea id="tipCode" class="form-textarea" style="min-height:90px;" placeholder="// Digite o código de exemplo..." required></textarea>
-      </div>
+        <div class="form-group">
+          <label>Código Recomendado:</label>
+          <textarea id="tipCode" class="form-textarea" style="min-height:90px;" placeholder="// Digite o código de exemplo..." required></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>O Que Evitar (Anti-Padrão - Opcional):</label>
-        <textarea id="tipBadCode" class="form-textarea" placeholder="// Código anti-padrão a evitar..."></textarea>
-      </div>
+        <div class="form-group">
+          <label>O Que Evitar (Anti-Padrão - Opcional):</label>
+          <textarea id="tipBadCode" class="form-textarea" placeholder="// Código anti-padrão a evitar..."></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>Por que evitar o anti-padrão (Opcional):</label>
-        <input type="text" id="tipBadCodeExplanation" class="form-input" placeholder="Ex: Causa vazamento de memória ou lentidão..." />
-      </div>
+        <div class="form-group">
+          <label>Por que evitar o anti-padrão (Opcional):</label>
+          <input type="text" id="tipBadCodeExplanation" class="form-input" placeholder="Ex: Causa vazamento de memória ou lentidão..." />
+        </div>
 
-      <div class="form-group">
-        <label>Boas Práticas (uma por linha):</label>
-        <textarea id="tipBestPractices" class="form-textarea" placeholder="Use sempre...\nEvite chamar..."></textarea>
-      </div>
+        <div class="form-group">
+          <label>Boas Práticas (uma por linha):</label>
+          <textarea id="tipBestPractices" class="form-textarea" placeholder="Use sempre...\nEvite chamar..."></textarea>
+        </div>
 
-      <div class="form-group">
-        <label>Atalho de Autocompletar (Trigger):</label>
-        <input type="text" id="tipTrigger" class="form-input" placeholder="Ex: meu-util-data" />
-      </div>
+        <div class="form-group">
+          <label>Atalho de Autocompletar (Trigger):</label>
+          <input type="text" id="tipTrigger" class="form-input" placeholder="Ex: meu-util-data" />
+        </div>
 
-      <div class="modal-buttons">
-        <button type="button" id="btnCancelModal" class="action-btn btn-copy">Cancelar</button>
-        <button type="submit" class="action-btn btn-insert">Salvar Meu Tip</button>
-      </div>
-    </form>
+        <div class="modal-buttons">
+          <button type="button" id="btnCancelModal" class="action-btn btn-copy">Cancelar</button>
+          <button type="submit" class="action-btn btn-insert">Salvar Meu Tip</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="categories-bar" id="categoriesBar"></div>
+    <div class="snippets-container" id="snippetsContainer"></div>
   </div>
 
-  <div class="categories-bar" id="categoriesBar"></div>
+  <!-- ==========================================
+       VIEW 2: TRADUTOR DE CÓDIGO (POLIGLOTA)
+       ========================================== -->
+  <div id="viewTranslator" class="view-panel">
+    <div class="translator-controls">
+      <div class="lang-pair-row">
+        <select id="transFromLang" class="lang-pair-select">
+          <option value="python">De: Python</option>
+          <option value="java" selected>De: Java</option>
+          <option value="typescript">De: TypeScript / JS</option>
+          <option value="csharp">De: C# (.NET)</option>
+          <option value="go">De: Go</option>
+          <option value="rust">De: Rust</option>
+        </select>
 
-  <div class="snippets-container" id="snippetsContainer"></div>
+        <button id="btnSwapLangs" class="btn-swap-langs" title="Inverter linguagens">⇄</button>
+
+        <select id="transToLang" class="lang-pair-select">
+          <option value="python" selected>Para: Python</option>
+          <option value="java">Para: Java</option>
+          <option value="typescript">Para: TypeScript / JS</option>
+          <option value="csharp">Para: C# (.NET)</option>
+          <option value="go">Para: Go</option>
+          <option value="rust">Para: Rust</option>
+        </select>
+      </div>
+
+      <div class="translator-actions-row">
+        <select id="presetSelect" class="preset-select">
+          <option value="">⚡ Carregar Exemplo Pronto...</option>
+          <option value="print-var">Exemplo: Impressão & Variáveis</option>
+          <option value="list-ops">Exemplo: Listas & Manipulação</option>
+          <option value="function-calc">Exemplo: Função com Retorno</option>
+          <option value="control-if">Exemplo: Condicional If / Else</option>
+        </select>
+
+        <button id="btnPullEditor" class="btn-action-top" title="Puxar código selecionado do editor ativo">
+          📥 Do Editor
+        </button>
+      </div>
+
+      <textarea id="transSourceInput" class="translator-textarea" placeholder="Cole ou digite aqui o código na linguagem de origem que você já conhece..."></textarea>
+
+      <button id="btnRunTranslation" class="btn-translate-now">
+        🚀 Traduzir para a Linguagem Objetivo
+      </button>
+    </div>
+
+    <!-- Translation Output Box -->
+    <div id="translationOutputBox" class="translation-output-box">
+      <div class="card" style="border-top:2px solid var(--vscode-button-background);">
+        <div class="card-header-bar" style="cursor:default;">
+          <div class="card-top-row">
+            <div class="card-title" id="transResultTitle">Código Traduzido</div>
+            <div class="badges-group" id="transBadgesGroup"></div>
+          </div>
+        </div>
+
+        <div class="code-container" style="border-radius:0; border-top:1px solid var(--vscode-panel-border, #333);">
+          <div class="code-actions-bar">
+            <button id="btnCopyTranslated" class="action-btn btn-copy">
+              📋 Copiar
+            </button>
+            <button id="btnInsertTranslated" class="action-btn btn-insert">
+              ⚡ Inserir no Editor
+            </button>
+          </div>
+          <pre><code id="transResultCode"></code></pre>
+        </div>
+
+        <div id="transNotesBox" class="notes-box"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const vscode = acquireVsCodeApi();
@@ -746,12 +1005,32 @@ export function getSidebarHtml(
     let currentLanguageId = "${currentLang.id}";
     let activeCategory = "all";
     let searchQuery = "";
+    let lastTranslatedCode = "";
 
-    // Card open state: snippetId -> boolean (DEFAULT: false = FECHADOS!)
     const cardOpenStates = new Map();
-    // Snippet active tab: snippetId -> "good" | "bad"
     const activeTabs = new Map();
 
+    // Mode switching elements
+    const btnTabGuide = document.getElementById("btnTabGuide");
+    const btnTabTranslator = document.getElementById("btnTabTranslator");
+    const viewGuide = document.getElementById("viewGuide");
+    const viewTranslator = document.getElementById("viewTranslator");
+
+    btnTabGuide.addEventListener("click", () => {
+      btnTabGuide.classList.add("active");
+      btnTabTranslator.classList.remove("active");
+      viewGuide.classList.add("active");
+      viewTranslator.classList.remove("active");
+    });
+
+    btnTabTranslator.addEventListener("click", () => {
+      btnTabTranslator.classList.add("active");
+      btnTabGuide.classList.remove("active");
+      viewTranslator.classList.add("active");
+      viewGuide.classList.remove("active");
+    });
+
+    // Guide view elements
     const langSelect = document.getElementById("langSelect");
     const searchInput = document.getElementById("searchInput");
     const categoriesBar = document.getElementById("categoriesBar");
@@ -816,7 +1095,6 @@ export function getSidebarHtml(
       };
 
       userCustomTips.unshift(newTip);
-      // Auto-open newly created tip
       cardOpenStates.set(id, true);
 
       vscode.postMessage({
@@ -942,7 +1220,7 @@ export function getSidebarHtml(
 
       // Comments
       html = html.replace(/(\\/{2}.*?$|#.*?$|--.*?$)/gm, '<span class="hl-com">$1</span>');
-      // Strings
+      // Strings & Characters (aspas duplas, simples e crases)
       html = html.replace(/(&quot;[\\s\\S]*?&quot;|&#039;[\\s\\S]*?&#039;|\\x60[\\s\\S]*?\\x60)/g, '<span class="hl-str">$1</span>');
       // Annotations
       html = html.replace(/(@[a-zA-Z0-9_]+)/g, '<span class="hl-anno">$1</span>');
@@ -985,7 +1263,6 @@ export function getSidebarHtml(
         });
       }
 
-      // SORTING: Pinned items appear FIRST!
       filtered.sort((a, b) => {
         const aPinned = pinnedTipIds.includes(a.id);
         const bPinned = pinnedTipIds.includes(b.id);
@@ -1018,7 +1295,7 @@ export function getSidebarHtml(
       container.innerHTML = filtered.map(snippet => {
         const catInfo = categories.find(c => c.id === snippet.category);
         const catLabel = catInfo ? catInfo.label : snippet.category;
-        const isOpen = cardOpenStates.get(snippet.id) === true; // DEFAULT: FECHADO!
+        const isOpen = cardOpenStates.get(snippet.id) === true;
         const isPinned = pinnedTipIds.includes(snippet.id);
         const currentTab = activeTabs.get(snippet.id) || "good";
         const hasBadCode = !!snippet.badCode;
@@ -1031,7 +1308,6 @@ export function getSidebarHtml(
 
         return \`
           <div class="card \${isOpen ? 'is-open' : ''} \${isPinned ? 'is-pinned' : ''}" id="card-\${snippet.id}">
-            <!-- Collapsible Header -->
             <div class="card-header-bar" onclick="toggleCard('\${snippet.id}')">
               <div class="card-top-row">
                 <div class="card-title-wrap">
@@ -1063,7 +1339,6 @@ export function getSidebarHtml(
               \` : ''}
             </div>
 
-            <!-- Collapsible Body Content -->
             <div class="card-body">
               <div class="card-summary-full">\${escapeHtml(snippet.summary)}</div>
 
@@ -1197,6 +1472,109 @@ export function getSidebarHtml(
       });
     };
 
+    // ==========================================
+    // TRANSLATOR CONTROLLER
+    // ==========================================
+    const transFromLang = document.getElementById("transFromLang");
+    const transToLang = document.getElementById("transToLang");
+    const btnSwapLangs = document.getElementById("btnSwapLangs");
+    const presetSelect = document.getElementById("presetSelect");
+    const btnPullEditor = document.getElementById("btnPullEditor");
+    const transSourceInput = document.getElementById("transSourceInput");
+    const btnRunTranslation = document.getElementById("btnRunTranslation");
+    const translationOutputBox = document.getElementById("translationOutputBox");
+    const transResultTitle = document.getElementById("transResultTitle");
+    const transBadgesGroup = document.getElementById("transBadgesGroup");
+    const transResultCode = document.getElementById("transResultCode");
+    const transNotesBox = document.getElementById("transNotesBox");
+    const btnCopyTranslated = document.getElementById("btnCopyTranslated");
+    const btnInsertTranslated = document.getElementById("btnInsertTranslated");
+
+    btnSwapLangs.addEventListener("click", () => {
+      const temp = transFromLang.value;
+      transFromLang.value = transToLang.value;
+      transToLang.value = temp;
+    });
+
+    btnPullEditor.addEventListener("click", () => {
+      vscode.postMessage({ command: "pullEditorSelection" });
+    });
+
+    // Sample Presets for Testing
+    const PRESETS = {
+      "print-var": {
+        python: 'nome = "Carlos"\\nidade = 28\\nprint(f"Olá {nome}, você tem {idade} anos!")',
+        java: 'String nome = "Carlos";\\nint idade = 28;\\nSystem.out.println("Olá " + nome + ", você tem " + idade + " anos!");',
+        typescript: 'const nome = "Carlos";\\nconst idade = 28;\\nconsole.log("Olá " + nome + ", você tem " + idade + " anos!");',
+        csharp: 'string nome = "Carlos";\\nint idade = 28;\\nConsole.WriteLine($"Olá {nome}, você tem {idade} anos!");',
+        go: 'nome := "Carlos"\\nidade := 28\\nfmt.Println("Olá", nome, idade)',
+        rust: 'let nome = "Carlos";\\nlet idade = 28;\\nprintln!("Olá {}, você tem {} anos!", nome, idade);'
+      },
+      "list-ops": {
+        python: 'numeros = [1, 2, 3]\\nnumeros.append(4)\\nprint(f"Total: {len(numeros)}")',
+        java: 'List<Integer> numeros = new ArrayList<>();\\nnumeros.add(1);\\nnumeros.add(2);\\nSystem.out.println(numeros.size());',
+        typescript: 'const numeros = [1, 2, 3];\\nnumeros.push(4);\\nconsole.log(numeros.length);',
+        csharp: 'var numeros = new List<int> { 1, 2, 3 };\\nnumeros.Add(4);\\nConsole.WriteLine(numeros.Count);',
+        go: 'numeros := []int{1, 2, 3}\\nnumeros = append(numeros, 4)\\nfmt.Println(len(numeros))',
+        rust: 'let mut numeros = vec![1, 2, 3];\\nnumeros.push(4);\\nprintln!("{}", numeros.len());'
+      },
+      "function-calc": {
+        python: 'def calcular_imposto(valor: float, taxa: float) -> float:\\n    return valor * taxa',
+        java: 'public static double calcularImposto(double valor, double taxa) {\\n    return valor * taxa;\\n}',
+        typescript: 'function calcularImposto(valor: number, taxa: number): number {\\n    return valor * taxa;\\n}',
+        csharp: 'public static double CalcularImposto(double valor, double taxa) {\\n    return valor * taxa;\\n}',
+        go: 'func calcularImposto(valor float64, taxa float64) float64 {\\n    return valor * taxa\\n}',
+        rust: 'fn calcular_imposto(valor: f64, taxa: f64) -> f64 {\\n    valor * taxa\\n}'
+      },
+      "control-if": {
+        python: 'saldo = 150.0\\nif saldo > 0:\\n    print("Saldo positivo")\\nelse:\\n    print("Sem saldo")',
+        java: 'double saldo = 150.0;\\nif (saldo > 0) {\\n    System.out.println("Saldo positivo");\\n} else {\\n    System.out.println("Sem saldo");\\n}',
+        typescript: 'const saldo = 150.0;\\nif (saldo > 0) {\\n    console.log("Saldo positivo");\\n} else {\\n    console.log("Sem saldo");\\n}',
+        csharp: 'double saldo = 150.0;\\nif (saldo > 0) {\\n    Console.WriteLine("Saldo positivo");\\n} else {\\n    Console.WriteLine("Sem saldo");\\n}',
+        go: 'saldo := 150.0\\nif saldo > 0 {\\n    fmt.Println("Saldo positivo")\\n} else {\\n    fmt.Println("Sem saldo")\\n}',
+        rust: 'let saldo = 150.0;\\nif saldo > 0.0 {\\n    println!("Saldo positivo");\\n} else {\\n    println!("Sem saldo");\\n}'
+      }
+    };
+
+    presetSelect.addEventListener("change", (e) => {
+      const presetKey = e.target.value;
+      if (!presetKey || !PRESETS[presetKey]) return;
+      const from = transFromLang.value;
+      const sample = PRESETS[presetKey][from] || PRESETS[presetKey]["python"];
+      transSourceInput.value = sample.replace(/\\\\n/g, '\\n');
+    });
+
+    btnRunTranslation.addEventListener("click", () => {
+      const code = transSourceInput.value.trim();
+      if (!code) {
+        vscode.postMessage({ command: "notify", text: "Digite ou cole algum código para traduzir!" });
+        return;
+      }
+
+      vscode.postMessage({
+        command: "translateCode",
+        sourceCode: code,
+        fromLang: transFromLang.value,
+        toLang: transToLang.value
+      });
+    });
+
+    btnCopyTranslated.addEventListener("click", () => {
+      if (!lastTranslatedCode) return;
+      navigator.clipboard.writeText(lastTranslatedCode).then(() => {
+        vscode.postMessage({ command: "notify", text: "Código traduzido copiado para a área de transferência!" });
+      });
+    });
+
+    btnInsertTranslated.addEventListener("click", () => {
+      if (!lastTranslatedCode) return;
+      vscode.postMessage({
+        command: "insertCode",
+        code: lastTranslatedCode,
+        title: "Código Traduzido (" + transToLang.value + ")"
+      });
+    });
+
     window.addEventListener("message", event => {
       const message = event.data;
       if (message.command === "setLanguage") {
@@ -1214,6 +1592,34 @@ export function getSidebarHtml(
         renderCategoriesBar();
         updateModalCategories();
         render();
+      } else if (message.command === "setEditorSelection") {
+        transSourceInput.value = message.text || "";
+        if (message.languageId) {
+          transFromLang.value = message.languageId;
+        }
+        // Switch to translator view automatically
+        btnTabTranslator.click();
+      } else if (message.command === "translationResult") {
+        const res = message.result;
+        lastTranslatedCode = res.translatedCode;
+
+        transResultTitle.textContent = \`Código Traduzido para \${res.targetLangName}\`;
+        transBadgesGroup.innerHTML = \`
+          <span class="badge-pill badge-cat">De: \${res.sourceLangName}</span>
+          <span class="badge-pill badge-level-iniciante">Para: \${res.targetLangName}</span>
+        \`;
+        transResultCode.innerHTML = highlightCode(res.translatedCode);
+
+        let notesHtml = \`<strong>💡 Notas Didáticas da Transcrição (\${res.sourceLangName} ➡️ \${res.targetLangName}):</strong>\`;
+        if (res.notes && res.notes.length > 0) {
+          notesHtml += '<ul>' + res.notes.map(n => \`<li>\${escapeHtml(n)}</li>\`).join('') + '</ul>';
+        } else {
+          notesHtml += '<p>Estruturas e tipos convertidos diretamente.</p>';
+        }
+        transNotesBox.innerHTML = notesHtml;
+
+        translationOutputBox.classList.add("visible");
+        translationOutputBox.scrollIntoView({ behavior: 'smooth' });
       }
     });
 
