@@ -76,6 +76,10 @@ class SidebarWebviewProvider {
                     this._currentLanguageId = data.languageId;
                     break;
                 }
+                case 'createTestFile': {
+                    await this.createScratchTestFile(data.languageId || this._currentLanguageId);
+                    break;
+                }
             }
         });
     }
@@ -91,10 +95,32 @@ class SidebarWebviewProvider {
     getCurrentLanguageId() {
         return this._currentLanguageId;
     }
+    async createScratchTestFile(languageId) {
+        const lang = (0, languages_1.getLanguageById)(languageId);
+        if (!lang)
+            return;
+        const vscodeLangId = lang.vscodeLanguageIds[0] || 'plaintext';
+        const sampleSnippet = lang.snippets[0];
+        const initialContent = [
+            `// ========================================================`,
+            `// 🎓 Arquivo de Teste Didático - Syntax Mentor (${lang.name})`,
+            `// Dica: Experimente o autocompletar digitando prefixos como:`,
+            `//       "${sampleSnippet.completionTrigger || 'mentor-'}" ou "string", "array"`,
+            `// ========================================================\n`,
+            sampleSnippet.code
+        ].join('\n');
+        const doc = await vscode.workspace.openTextDocument({
+            language: vscodeLangId,
+            content: initialContent
+        });
+        await vscode.window.showTextDocument(doc, { preview: false });
+        vscode.window.showInformationMessage(`Arquivo de teste para ${lang.name} criado! Teste a edição e o autocompletar em tempo real.`);
+    }
     async insertCodeIntoEditor(code, title) {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showWarningMessage('Nenhum editor de texto ativo para inserir o código.');
+            // If no editor is open, offer to create one!
+            await this.createScratchTestFile(this._currentLanguageId);
             return;
         }
         const selection = editor.selection;

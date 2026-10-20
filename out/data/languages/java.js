@@ -17,25 +17,32 @@ exports.javaDefinition = {
             id: 'java-string-immutability',
             title: 'String: Declaração, Imutabilidade e String Pool',
             category: 'strings',
-            summary: 'No Java, objetos String são imutáveis e armazenados no String Pool para economia de memória.',
+            level: 'Iniciante',
+            summary: 'No Java, objetos String são imutáveis e gerenciados no String Pool para otimização de memória.',
             keywords: ['string', 'equals', 'pool', 'imutavel', 'texto'],
             completionTrigger: 'java-string-pool',
-            code: `// 1. Literais usam o String Pool (mesmo endereço de memória)
+            code: `// 1. Literais usam o String Pool (compartilham a mesma referência)
 String str1 = "Olá, Mundo!";
 String str2 = "Olá, Mundo!";
 
-// 2. Criação explícita aloca novo objeto fora da deduplicação direta
+// 2. new String() força alocação de novo objeto fora da deduplicação direta
 String str3 = new String("Olá, Mundo!");
-
-// ATENÇÃO: Nunca compare conteúdo de Strings com '=='!
-boolean mesmaReferencia = (str1 == str2);   // true (mesma instância no pool)
-boolean referenciaDiferente = (str1 == str3); // false (endereços de heap distintos)
 
 // A FORMA CORRETA: Use .equals() ou .equalsIgnoreCase()
 boolean mesmoConteudo = str1.equals(str3); // true!
 
-// Proteção contra NullPointerException com Objects.equals ou literal primeiro:
-boolean seguro = "Olá, Mundo!".equals(str3);`,
+// Proteção contra NullPointerException (literal à esquerda ou Objects.equals):
+boolean seguro = "ADMIN".equals(str3);
+boolean seguroObjects = java.util.Objects.equals(str1, str3);`,
+            badCode: `// ❌ NUNCA compare conteúdo de Strings com '=='!
+String entrada = new String("ADMIN");
+
+if (entrada == "ADMIN") { 
+    // Pode falhar em tempo de execução!
+    // '==' compara endereços de memória, NÃO o conteúdo dos caracteres!
+    System.out.println("Acesso concedido");
+}`,
+            badCodeExplanation: "O operador '==' em Java compara se os dois ponteiros apontam para exatamente o mesmo endereço físico no heap. Usar '==' para comparar strings é uma das maiores causas de bugs intermitentes em produção.",
             explanation: 'Strings em Java são imutáveis: qualquer alteração (como .toUpperCase() ou concatenação com +) gera um novo objeto em memória em vez de modificar o original. O operador == compara referências de memória; use sempre .equals() para comparar o valor dos caracteres.',
             bestPractices: [
                 'Sempre use .equals() ou Objects.equals() para comparar valores de String.',
@@ -50,11 +57,12 @@ boolean seguro = "Olá, Mundo!".equals(str3);`,
             id: 'java-string-builder',
             title: 'StringBuilder: Concatenação Eficiente em Loops',
             category: 'strings',
+            level: 'Intermediário',
             summary: 'Para concatenações repetitivas ou dentro de loops, use StringBuilder para evitar a criação de múltiplos objetos intermediários.',
             keywords: ['stringbuilder', 'concatenacao', 'loop', 'performance', 'buffer'],
             completionTrigger: 'java-string-builder',
-            code: `// StringBuilder não é thread-safe, mas é o mais rápido para uso local
-StringBuilder sb = new StringBuilder();
+            code: `// StringBuilder acumula bytes em um buffer expansível sem alocações desnecessárias
+StringBuilder sb = new StringBuilder(256); // Pré-aloca capacidade
 sb.append("Relatório de Vendas:").append("\\n");
 
 for (int i = 1; i <= 5; i++) {
@@ -67,6 +75,14 @@ for (int i = 1; i <= 5; i++) {
 
 String resultadoFinal = sb.toString();
 System.out.println(resultadoFinal);`,
+            badCode: `// ❌ EVITE concatenação com '+' dentro de loops longos!
+String relatorio = "";
+for (int i = 1; i <= 1000; i++) {
+    // A cada iteração é criado um novo objeto String e copiado todo o texto anterior!
+    // Complexidade de tempo: O(N^2)
+    relatorio += "Linha " + i + "\\n"; 
+}`,
+            badCodeExplanation: "Dentro de loops, somar Strings com '+=' força a JVM a copiar repetidamente os caracteres acumulados para novos arrays de caracteres, degradando a performance para O(N²).",
             explanation: 'O operador + simples fora de loops é otimizado pelo compilador (Java 9+ usa invokedynamic e StringConcatFactory). Porém, dentro de loops, o operador + ainda pode criar objetos intermediários indesejados. StringBuilder resolve isso acumulando bytes em um buffer expansível.',
             bestPractices: [
                 'Use StringBuilder para acumular texto dentro de loops.',
@@ -78,10 +94,11 @@ System.out.println(resultadoFinal);`,
             id: 'java-string-textblocks-format',
             title: 'Text Blocks (Java 15+) e Métodos Modernos de String',
             category: 'strings',
+            level: 'Iniciante',
             summary: 'Strings multi-linha nativas sem necessidade de escapar aspas ou adicionar \\n manualmente.',
             keywords: ['text blocks', 'json', 'sql', 'strip', 'multiline', 'isBlank'],
             completionTrigger: 'java-string-textblocks',
-            code: `// Text Blocks delimitados por 3 aspas duplas:
+            code: `// Text Blocks delimitados por 3 aspas duplas ("""):
 String queryJson = """
     {
         "usuario": "%s",
@@ -97,6 +114,12 @@ boolean vaziaOuEspacos = entrada.isBlank();   // false (considera espaços)
 String limpa = entrada.strip();              // "Aprendendo Java Moderno" (suporta unicode, superior a .trim())
 String repetida = "Code! ".repeat(3);        // "Code! Code! Code! "
 boolean contem = entrada.contains("Java");    // true`,
+            badCode: `// ❌ Legado: Concatenações complexas com sequências de escape
+String jsonLegado = "{\\n" +
+                    "    \\"usuario\\": \\"" + nome + "\\",\\n" +
+                    "    \\"ativo\\": true\\n" +
+                    "}";`,
+            badCodeExplanation: "Strings multi-linhas legadas com '+\" e escape manual de aspas são difíceis de ler, propensas a erros de digitação e poluem o código.",
             explanation: 'Text Blocks preservam quebras de linha e indentação relativa automaticamente, eliminando concatenações incômodas para JSON, SQL ou HTML. .strip() é a versão moderna de .trim() com suporte total a espaços em branco do padrão Unicode.',
             bestPractices: [
                 'Prefira .formatted(...) em Text Blocks em vez de constantes String.format(...).',
@@ -110,15 +133,16 @@ boolean contem = entrada.contains("Java");    // true`,
             id: 'java-arrays-basics',
             title: 'Arrays Estáticos: Declaração, Tamanho Fixo e Utilidades',
             category: 'arrays_and_collections',
+            level: 'Iniciante',
             summary: 'Arrays em Java possuem tamanho imutável após a criação e alocação de memória contígua.',
             keywords: ['array', 'vetor', 'matriz', 'arrays.tostring', 'length'],
             completionTrigger: 'java-array-static',
             code: `import java.util.Arrays;
 
-// 1. Declaração com inicialização direta (tam 4)
+// 1. Declaração com inicialização direta
 int[] numeros = { 10, 20, 30, 40 };
 
-// 2. Declaração alocando tamanho fixo (valores padrão: 0, null ou false)
+// 2. Declaração alocando tamanho fixo
 String[] nomes = new String[3];
 nomes[0] = "Alice";
 nomes[1] = "Bob";
@@ -126,14 +150,21 @@ nomes[2] = "Carol";
 
 // Acessando propriedades
 int tamanho = numeros.length; // ATENÇÃO: length é atributo, não método!
-int primeiro = numeros[0];
 
-// Imprimindo amigavelmente (evita printar [I@1b6d3586)
+// Imprimindo amigavelmente (use Arrays.toString!):
 System.out.println("Nomes: " + Arrays.toString(nomes));
 
-// Ordenação nativa (Dual-Pivot Quicksort)
+// Ordenação nativa (Dual-Pivot Quicksort O(N log N)):
 int[] desordenado = { 5, 2, 8, 1 };
 Arrays.sort(desordenado); // { 1, 2, 5, 8 }`,
+            badCode: `int[] dados = { 1, 2, 3 };
+
+// ❌ Chamar .toString() diretamente no array imprime o ponteiro da JVM!
+System.out.println(dados); // Imprime: [I@1b6d3586 (Inútil para humanos!)
+
+// ❌ Ultrapassar o tamanho alocado dispara ArrayIndexOutOfBoundsException
+dados[3] = 4; // ERRO em tempo de execução!`,
+            badCodeExplanation: "Arrays em Java não implementam um .toString() amigável, apenas herdam o padrão de Object. Além disso, seu tamanho é estritamente imutável após alocado.",
             explanation: 'Arrays são estruturas de baixo nível de altíssima performance com acesso O(1) por índice. Contudo, seu tamanho não pode ser expandido nem reduzido. Para coleções que crescem dinamicamente, prefira List<T> (ArrayList).',
             bestPractices: [
                 'Prefira int[] nomes a int nomes[] (convenção padrão Java).',
@@ -149,6 +180,7 @@ Arrays.sort(desordenado); // { 1, 2, 5, 8 }`,
             id: 'java-collections-arraylist',
             title: 'Listas Dinâmicas (ArrayList e List.of)',
             category: 'arrays_and_collections',
+            level: 'Iniciante',
             summary: 'List<T> é a coleção sequencial dinâmica mais utilizada em Java, substituindo arrays tradicionais.',
             keywords: ['list', 'arraylist', 'list.of', 'adicionar', 'remover'],
             completionTrigger: 'java-list-arraylist',
@@ -168,8 +200,14 @@ int total = frutas.size();                 // 2 (size() é método)
 String primeira = frutas.get(0);          // "Maçã"
 
 // 2. Lista Imutável (Java 9+ List.of):
-List<Integer> codigosFixos = List.of(200, 201, 204, 400, 404, 500);
-// codigosFixos.add(502); // DISPARA UnsupportedOperationException!`,
+List<Integer> codigosFixos = List.of(200, 201, 204, 400, 404, 500);`,
+            badCode: `// ❌ Acoplamento rígido à implementação concreta:
+ArrayList<String> listaRuim = new ArrayList<String>();
+
+// ❌ Tentar modificar uma lista imutável:
+List<String> imutavel = List.of("A", "B");
+imutavel.add("C"); // Dispara UnsupportedOperationException!`,
+            badCodeExplanation: "Declarar a variável como 'ArrayList' acopla seu código à implementação em vez de usar a interface genérica 'List'. Além disso, List.of cria coleções estritamente imutáveis.",
             explanation: 'Sempre declare a variável com o tipo da interface (List<String>) e instancie com a classe concreta (ArrayList<String>). Isso garante baixo acoplamento e flexibilidade para trocar de implementação se necessário.',
             bestPractices: [
                 'Programe para interfaces: List<T> lista = new ArrayList<>();',
@@ -181,6 +219,7 @@ List<Integer> codigosFixos = List.of(200, 201, 204, 400, 404, 500);
             id: 'java-collections-map-hashmap',
             title: 'Mapas Chave-Valor (HashMap e Map.of)',
             category: 'arrays_and_collections',
+            level: 'Intermediário',
             summary: 'Estrutura associativa ultra-rápida (O(1) médio) para busca por chave única.',
             keywords: ['map', 'hashmap', 'chave', 'valor', 'dicionario'],
             completionTrigger: 'java-map-hashmap',
@@ -202,14 +241,7 @@ precos.computeIfAbsent("Headset", k -> 299.90);
 // Iterando sobre chave e valor:
 for (Map.Entry<String, Double> item : precos.entrySet()) {
     System.out.println(item.getKey() + " -> R$ " + item.getValue());
-}
-
-// Mapa imutável rápido (Java 9+):
-Map<String, String> status = Map.of(
-    "PENDENTE", "#FFCC00",
-    "APROVADO", "#00CC66",
-    "REJEITADO", "#FF0033"
-);`,
+}`,
             explanation: 'HashMap armazena pares chave/valor usando o hashCode() da chave para determinar a posição em buckets. Se você usar objetos customizados como chave, DEVE implementar tanto equals() quanto hashCode() coerentemente.',
             bestPractices: [
                 'Sempre implemente equals() e hashCode() se utilizar classes próprias como chaves.',
@@ -220,6 +252,7 @@ Map<String, String> status = Map.of(
             id: 'java-streams-api',
             title: 'Streams API: Filtros, Transformações e Agrupamento',
             category: 'arrays_and_collections',
+            level: 'Avançado',
             summary: 'Processamento funcional declarativo e elegante sobre coleções.',
             keywords: ['stream', 'filter', 'map', 'collect', 'lambda', 'reduce'],
             completionTrigger: 'java-stream-ops',
@@ -233,7 +266,7 @@ List<String> resultado = programadores.stream()
     .filter(nome -> nome.startsWith("A"))
     .map(String::toUpperCase)
     .sorted()
-    .collect(Collectors.toList()); // Ou .toList() no Java 16+
+    .toList(); // Java 16+ toList() imutável direto
 
 System.out.println(resultado); // [ADA LOVELACE, ALAN TURING]
 
@@ -243,77 +276,19 @@ double media = notas.stream()
     .mapToInt(Integer::intValue)
     .average()
     .orElse(0.0);`,
+            badCode: `// ❌ Código imperativo manual verboso e com mutação de estado:
+List<String> filtrados = new ArrayList<>();
+for (String nome : programadores) {
+    if (nome.startsWith("A")) {
+        filtrados.add(nome.toUpperCase());
+    }
+}
+Collections.sort(filtrados);`,
+            badCodeExplanation: "Loops imperativos com listas mutáveis acumulam mais linhas de código, aumentam o risco de bugs de mutação concorrente e não se beneficiam de paralelização simples (.parallelStream()).",
             explanation: 'Streams não modificam a coleção original. Eles criam um fluxo sob demanda dividido em operações intermediárias (filter, map) e uma operação terminal (collect, forEach, reduce).',
             bestPractices: [
                 'No Java 16+, prefira .toList() em vez de .collect(Collectors.toList()) quando não precisar alterar a lista retornada.',
                 'Use mapToInt / mapToDouble para evitar custos de autoboxing em operações matemáticas.'
-            ]
-        },
-        // ==========================================
-        // TIPOS & VARIÁVEIS
-        // ==========================================
-        {
-            id: 'java-variables-primitives-var',
-            title: 'Tipos Primitivos, Wrappers e Inferência com "var"',
-            category: 'variables_and_types',
-            summary: 'Primitivos residem na pilha (stack) para velocidade; wrappers residem na heap e aceitam null.',
-            keywords: ['var', 'int', 'double', 'primitivos', 'boxing', 'final'],
-            completionTrigger: 'java-types-var',
-            code: `// Primitivos (alta performance, não podem ser null)
-int contador = 10;
-double salario = 4500.50;
-boolean ativo = true;
-char letra = 'J';
-
-// Wrappers correspondentes (podem ser null e usados em generics)
-Integer contadorObj = 10; // Autoboxing automático
-Double salarioObj = null; // Aceita null
-
-// Inferência de Tipo com 'var' (Java 10+ para variáveis locais):
-var mensagem = "Compilador infere como String";
-var lista = new java.util.ArrayList<String>(); // Infere ArrayList<String>
-
-// Constantes com 'final':
-final double PI = 3.14159265359;
-// PI = 3.14; // ERRO de compilação: não pode ser reatribuído`,
-            explanation: 'A palavra-chave var NÃO torna o Java dinâmico: o compilador descobre o tipo no momento da compilação e o fixa. Use var para reduzir redundâncias longas na declaração.',
-            bestPractices: [
-                'Use tipos primitivos para cálculos intensivos e atributos numéricos padrão.',
-                'Use wrappers quando precisar representar ausência de valor (null) ou com coleções (List<Integer>).',
-                'Use var apenas quando o tipo for evidente pelo lado direito da atribuição.'
-            ]
-        },
-        // ==========================================
-        // CONTROLE DE FLUXO
-        // ==========================================
-        {
-            id: 'java-switch-expressions',
-            title: 'Switch Expressions e Pattern Matching (Java 14/17+)',
-            category: 'control_flow',
-            summary: 'Novo switch moderno com sintaxe de flecha (->) que retorna valores e dispensa break manual.',
-            keywords: ['switch', 'pattern matching', 'case', 'yield', 'arrow'],
-            completionTrigger: 'java-switch-modern',
-            code: `String dia = "SEGUNDA";
-
-// Switch Expression com retorno direto:
-String tipoDia = switch (dia) {
-    case "SABADO", "DOMINGO" -> "Final de Semana";
-    case "SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA" -> "Dia Útil";
-    default -> throw new IllegalArgumentException("Dia inválido: " + dia);
-};
-
-// Pattern Matching com Switch (Java 21):
-Object objeto = "Texto qualquer";
-String descricao = switch (objeto) {
-    case Integer i -> "Número inteiro: " + (i * 2);
-    case String s  -> "String de tamanho: " + s.length();
-    case null      -> "Objeto nulo!";
-    default        -> "Tipo desconhecido: " + objeto.getClass().getSimpleName();
-};`,
-            explanation: 'O switch moderno elimina o infame problema de fallthrough (esquecer o break e executar casos seguintes). Quando usado como expressão que atribui a uma variável, o compilador exige que todos os casos possíveis sejam cobertos.',
-            bestPractices: [
-                'Prefira a sintaxe de flecha (->) para evitar a necessidade de breaks.',
-                'Use o switch para retornar valores diretamente sem variáveis temporárias.'
             ]
         },
         // ==========================================
@@ -323,12 +298,13 @@ String descricao = switch (objeto) {
             id: 'java-oop-records',
             title: 'Records (Java 16+): DTOs Imutáveis sem Boilerplate',
             category: 'oop_and_structs',
+            level: 'Intermediário',
             summary: 'Substitui classes de dados verbosas, gerando automaticamente getters, equals, hashCode e toString.',
             keywords: ['record', 'dto', 'imutavel', 'classe', 'construtor'],
             completionTrigger: 'java-record-dto',
-            code: `// Declaração em uma única linha!
+            code: `// Declaração completa de um DTO em uma única linha!
 public record ClienteDTO(Long id, String nome, String email) {
-    // Construtor compacto para validação de integridade:
+    // Construtor compacto para validações de integridade:
     public ClienteDTO {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("Nome é obrigatório!");
@@ -338,14 +314,19 @@ public record ClienteDTO(Long id, String nome, String email) {
 
 // Uso do Record:
 ClienteDTO cliente = new ClienteDTO(1L, "Mariana", "mariana@email.com");
-
-// Métodos de acesso gerados (sem o prefixo 'get'):
-System.out.println(cliente.nome());  // "Mariana"
-System.out.println(cliente.email()); // "mariana@email.com"
-
-// Já possui toString, equals e hashCode implementados perfeitamente:
-System.out.println(cliente); // ClienteDTO[id=1, nome=Mariana, email=mariana@email.com]`,
-            explanation: 'Records são portadores de dados transparentes e imutáveis. Todos os campos são privados e final por padrão. Evitam dezenas de linhas de código repetitivo ou anotações externas como Lombok.',
+System.out.println(cliente.nome());  // "Mariana" (sem 'get')
+System.out.println(cliente);         // ClienteDTO[id=1, nome=Mariana, email=mariana@email.com]`,
+            badCode: `// ❌ Mais de 40 linhas de boilerplate para um simples portador de dados:
+public class ClienteLegado {
+    private final Long id;
+    private final String nome;
+    public ClienteLegado(Long id, String nome) { this.id = id; this.nome = nome; }
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    // + equals(), + hashCode(), + toString() manuais!
+}`,
+            badCodeExplanation: "Classes de dados tradicionais exigem dezenas de linhas de getters, equals, hashCode e toString propensas a erros de sincronização quando novos campos são adicionados.",
+            explanation: 'Records são portadores de dados transparentes e imutáveis. Todos os campos são privados e final por padrão. Evitam dezenas de linhas de código repetitivo ou dependências de bibliotecas de terceiros como Lombok.',
             bestPractices: [
                 'Use Records para transferências de dados (DTOs), respostas de API e chaves de mapas compostas.',
                 'Não tente estender Records (eles são implicitamente final).'
@@ -358,6 +339,7 @@ System.out.println(cliente); // ClienteDTO[id=1, nome=Mariana, email=mariana@ema
             id: 'java-error-try-with-resources',
             title: 'Try-with-Resources: Fechamento Seguro de Recursos',
             category: 'error_handling',
+            level: 'Intermediário',
             summary: 'Garante que arquivos, conexões e fluxos sejam fechados automaticamente, prevenindo vazamentos de memória.',
             keywords: ['try', 'catch', 'autocloseable', 'recursos', 'excecoes'],
             completionTrigger: 'java-try-resources',
@@ -373,13 +355,24 @@ try (BufferedReader reader = new BufferedReader(new FileReader("dados.txt"))) {
     }
 } catch (IOException e) {
     System.err.println("Erro ao ler arquivo: " + e.getMessage());
-    // Tratar adequadamente ou encapsular em RuntimeException
 }
 // O arquivo é fechado AQUI automaticamente, mesmo em caso de exceção!`,
+            badCode: `// ❌ Antigo padrão pré-Java 7: propenso a vazamentos de recursos (Memory Leaks)
+BufferedReader br = null;
+try {
+    br = new BufferedReader(new FileReader("dados.txt"));
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    if (br != null) {
+        try { br.close(); } catch (IOException ignored) {}
+    }
+}`,
+            badCodeExplanation: "O bloco finally manual é verboso e pode falhar silenciosamente caso o método .close() lance outra exceção suprimindo a exceção original.",
             explanation: 'Antes do Java 7, era necessário fechar recursos dentro de um bloco finally com verificações nulas e novos try-catchs. O try-with-resources resolve isso garantindo invocação segura de .close().',
             bestPractices: [
                 'Sempre use try-with-resources para I/O, JDBC Statements, ResultSets e Sockets.',
-                'Nunca engula exceções com blocos catch vazios (catch (Exception e) {}).'
+                'Nunca engula exceções com blocos catch vazios.'
             ]
         },
         // ==========================================
@@ -389,6 +382,7 @@ try (BufferedReader reader = new BufferedReader(new FileReader("dados.txt"))) {
             id: 'java-async-completablefuture',
             title: 'CompletableFuture e Threads Virtuais (Java 21)',
             category: 'async_concurrency',
+            level: 'Avançado',
             summary: 'Execução assíncrona não bloqueante e alta concorrência com Virtual Threads.',
             keywords: ['async', 'completablefuture', 'thread', 'virtual threads', 'executor'],
             completionTrigger: 'java-completable-future',
@@ -396,10 +390,9 @@ try (BufferedReader reader = new BufferedReader(new FileReader("dados.txt"))) {
 
 // Execução assíncrona encadeada:
 CompletableFuture.supplyAsync(() -> {
-    // Simula chamada de rede / API externa
     return "Dados do Usuário #42";
 })
-.thenApply(dados -> dados.toUpperCase())
+.thenApply(String::toUpperCase)
 .thenAccept(resultado -> {
     System.out.println("Processado: " + resultado);
 })

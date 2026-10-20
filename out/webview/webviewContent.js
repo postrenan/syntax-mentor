@@ -5,7 +5,6 @@ const languages_1 = require("../data/languages");
 const types_1 = require("../types");
 function getSidebarHtml(currentLangId) {
     const currentLang = (0, languages_1.getLanguageById)(currentLangId) || languages_1.ALL_LANGUAGES[0];
-    // Prepare JSON serialized language database for fast client-side searching and tab switching
     const languagesJson = JSON.stringify(languages_1.ALL_LANGUAGES);
     const categoriesJson = JSON.stringify(types_1.CATEGORIES);
     return `<!DOCTYPE html>
@@ -51,7 +50,7 @@ function getSidebarHtml(currentLangId) {
 
     .lang-select {
       flex: 1;
-      padding: 6px 10px;
+      padding: 7px 10px;
       border-radius: 4px;
       background: var(--vscode-dropdown-background);
       color: var(--vscode-dropdown-foreground);
@@ -66,9 +65,28 @@ function getSidebarHtml(currentLangId) {
       border-color: var(--vscode-focusBorder);
     }
 
+    .btn-create-test {
+      padding: 7px 10px;
+      border-radius: 4px;
+      background: var(--vscode-button-secondaryBackground, #3a3d41);
+      color: var(--vscode-button-secondaryForeground, #ffffff);
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    .btn-create-test:hover {
+      filter: brightness(1.2);
+    }
+
     .search-box {
       width: 100%;
-      padding: 7px 10px;
+      padding: 8px 10px;
       border-radius: 4px;
       background: var(--vscode-input-background);
       color: var(--vscode-input-foreground);
@@ -79,6 +97,17 @@ function getSidebarHtml(currentLangId) {
 
     .search-box:focus {
       border-color: var(--vscode-focusBorder);
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground);
+      margin-bottom: 6px;
+      padding: 0 2px;
     }
 
     /* Category Pills */
@@ -126,23 +155,23 @@ function getSidebarHtml(currentLangId) {
     .snippets-container {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     .card {
       background: var(--vscode-editor-background);
       border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
-      border-radius: 6px;
-      padding: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-      transition: border-color 0.15s;
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .card:hover {
       border-color: var(--vscode-focusBorder);
     }
 
-    .card-header {
+    .card-top-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -151,26 +180,55 @@ function getSidebarHtml(currentLangId) {
     }
 
     .card-title {
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--vscode-editor-foreground);
       line-height: 1.3;
     }
 
-    .card-category-badge {
+    .badges-group {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge-pill {
       font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
       padding: 2px 6px;
       border-radius: 4px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .badge-cat {
       background: var(--vscode-badge-background);
       color: var(--vscode-badge-foreground);
-      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-level-iniciante {
+      background: rgba(46, 125, 50, 0.2);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+
+    .badge-level-intermediario {
+      background: rgba(239, 108, 0, 0.2);
+      color: #ff9800;
+      border: 1px solid rgba(255, 152, 0, 0.3);
+    }
+
+    .badge-level-avancado {
+      background: rgba(156, 39, 176, 0.2);
+      color: #ba68c8;
+      border: 1px solid rgba(186, 104, 200, 0.3);
     }
 
     .card-summary {
-      font-size: 12px;
-      opacity: 0.9;
+      font-size: 12.5px;
+      opacity: 0.92;
       margin-bottom: 10px;
       color: var(--vscode-descriptionForeground);
     }
@@ -178,35 +236,66 @@ function getSidebarHtml(currentLangId) {
     .card-explanation {
       background: rgba(127, 127, 127, 0.08);
       border-left: 3px solid var(--vscode-button-background);
-      padding: 8px 10px;
-      border-radius: 0 4px 4px 0;
+      padding: 9px 12px;
+      border-radius: 0 6px 6px 0;
       font-size: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
-    /* Code block container */
+    /* Code View Tabs (Idiomático vs Anti-padrão) */
+    .code-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--vscode-panel-border, #333);
+      margin-bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+    }
+
+    .code-tab-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      border: none;
+      background: transparent;
+      color: var(--vscode-descriptionForeground);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .code-tab-btn.active {
+      color: var(--vscode-editor-foreground);
+      background: var(--vscode-textCodeBlock-background, #1e1e1e);
+      border-bottom: 2px solid var(--vscode-button-background);
+      font-weight: 600;
+    }
+
     .code-container {
       position: relative;
-      margin-bottom: 10px;
-      border-radius: 4px;
+      margin-bottom: 12px;
+      border-radius: 0 0 6px 6px;
       overflow: hidden;
       background: var(--vscode-textCodeBlock-background, #1e1e1e);
       border: 1px solid var(--vscode-panel-border, #333);
+      border-top: none;
     }
 
     .code-actions-bar {
       display: flex;
       justify-content: flex-end;
       gap: 6px;
-      padding: 5px 8px;
+      padding: 6px 10px;
       background: rgba(0, 0, 0, 0.15);
       border-bottom: 1px solid rgba(128, 128, 128, 0.15);
     }
 
     .action-btn {
-      padding: 3px 8px;
+      padding: 4px 9px;
       font-size: 11px;
-      border-radius: 3px;
+      border-radius: 4px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -214,6 +303,7 @@ function getSidebarHtml(currentLangId) {
       border: none;
       outline: none;
       font-weight: 500;
+      transition: filter 0.15s;
     }
 
     .btn-insert {
@@ -235,14 +325,22 @@ function getSidebarHtml(currentLangId) {
     }
 
     pre {
-      padding: 10px;
+      padding: 12px;
       overflow-x: auto;
       font-family: var(--code-font);
       font-size: 12px;
-      line-height: 1.45;
+      line-height: 1.5;
       color: var(--vscode-editor-foreground);
       white-space: pre;
     }
+
+    /* Syntax Highlighting Colors */
+    .hl-kw { color: #569cd6; font-weight: bold; }
+    .hl-type { color: #4ec9b0; }
+    .hl-str { color: #ce9178; }
+    .hl-num { color: #b5cea8; }
+    .hl-com { color: #6a9955; font-style: italic; }
+    .hl-fn { color: #dcdcaa; }
 
     /* Checklist & Warnings */
     .section-title {
@@ -250,7 +348,7 @@ function getSidebarHtml(currentLangId) {
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-top: 8px;
+      margin-top: 10px;
       margin-bottom: 4px;
       display: flex;
       align-items: center;
@@ -264,9 +362,9 @@ function getSidebarHtml(currentLangId) {
 
     .best-practices-list li {
       position: relative;
-      padding-left: 18px;
+      padding-left: 20px;
       font-size: 11.5px;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       color: var(--vscode-editor-foreground);
     }
 
@@ -274,14 +372,14 @@ function getSidebarHtml(currentLangId) {
       content: "✔";
       position: absolute;
       left: 0;
-      color: #388e3c;
+      color: #4caf50;
       font-weight: bold;
     }
 
     .pitfall-box {
-      background: rgba(244, 67, 54, 0.1);
+      background: rgba(244, 67, 54, 0.08);
       border-left: 3px solid #f44336;
-      padding: 6px 10px;
+      padding: 8px 10px;
       border-radius: 0 4px 4px 0;
       font-size: 11.5px;
       margin-top: 6px;
@@ -291,19 +389,19 @@ function getSidebarHtml(currentLangId) {
     .trigger-hint {
       font-size: 11px;
       color: var(--vscode-descriptionForeground);
-      margin-top: 6px;
+      margin-top: 8px;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
     .trigger-code {
       font-family: var(--code-font);
       background: var(--vscode-badge-background);
       color: var(--vscode-badge-foreground);
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-size: 10.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
     }
 
     .empty-state {
@@ -323,9 +421,17 @@ function getSidebarHtml(currentLangId) {
           </option>
         `).join('')}
       </select>
+      <button id="btnCreateTest" class="btn-create-test" title="Criar arquivo de rascunho para testar">
+        📄 Testar
+      </button>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: string, array, loop, erro)..." />
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: string, array, stream, loop)..." />
+
+    <div class="stats-bar">
+      <span id="topicCountPill">Carregando tópicos...</span>
+      <span id="analyzerActivePill">⚡ Analisador em Tempo Real Ativo</span>
+    </div>
   </div>
 
   <div class="categories-bar" id="categoriesBar">
@@ -345,16 +451,23 @@ function getSidebarHtml(currentLangId) {
     let currentLanguageId = "${currentLang.id}";
     let activeCategory = "all";
     let searchQuery = "";
+    // State of snippet active tab: snippetId -> "good" | "bad"
+    const activeTabs = new Map();
 
     const langSelect = document.getElementById("langSelect");
     const searchInput = document.getElementById("searchInput");
     const categoriesBar = document.getElementById("categoriesBar");
     const container = document.getElementById("snippetsContainer");
+    const topicCountPill = document.getElementById("topicCountPill");
+    const btnCreateTest = document.getElementById("btnCreateTest");
 
-    // Initialize
-    render();
+    btnCreateTest.addEventListener("click", () => {
+      vscode.postMessage({
+        command: "createTestFile",
+        languageId: currentLanguageId
+      });
+    });
 
-    // Event Listeners
     langSelect.addEventListener("change", (e) => {
       currentLanguageId = e.target.value;
       vscode.postMessage({ command: "changeLanguage", languageId: currentLanguageId });
@@ -385,6 +498,27 @@ function getSidebarHtml(currentLangId) {
         .replace(/'/g, "&#039;");
     }
 
+    // Lightweight client-side syntax highlighter
+    function highlightCode(code) {
+      if (!code) return "";
+      let html = escapeHtml(code);
+
+      // Comments
+      html = html.replace(/(\\/{2}.*?$|#.*?$)/gm, '<span class="hl-com">$1</span>');
+      // Strings
+      html = html.replace(/(&quot;[\\s\\S]*?&quot;|&#039;[\\s\\S]*?&#039;|\\x60[\\s\\S]*?\\x60)/g, '<span class="hl-str">$1</span>');
+      // Numbers
+      html = html.replace(/\\b(\\d+(?:\\.\\d+)?(?:[fLmd])?)\\b/g, '<span class="hl-num">$1</span>');
+      // Keywords
+      const keywords = "\\b(public|private|protected|static|final|class|record|interface|enum|void|return|new|import|package|def|fn|func|let|const|var|mut|struct|impl|match|case|switch|if|else|for|while|try|catch|finally|throw|throws|async|await|select)\\b";
+      html = html.replace(new RegExp(keywords, "g"), '<span class="hl-kw">$1</span>');
+      // Common Types
+      const types = "\\b(String|StringBuilder|List|ArrayList|Map|HashMap|Set|HashSet|Integer|Double|Boolean|Task|Promise|Vec|Option|Result|int|double|boolean|char|byte|long|float)\\b";
+      html = html.replace(new RegExp(types, "g"), '<span class="hl-type">$1</span>');
+
+      return html;
+    }
+
     function render() {
       const lang = languages.find(l => l.id === currentLanguageId) || languages[0];
       let filtered = lang.snippets;
@@ -403,6 +537,8 @@ function getSidebarHtml(currentLangId) {
         });
       }
 
+      topicCountPill.textContent = \`📚 \${filtered.length} tópicos em \${lang.name}\`;
+
       if (filtered.length === 0) {
         container.innerHTML = \`
           <div class="empty-state">
@@ -415,12 +551,23 @@ function getSidebarHtml(currentLangId) {
       container.innerHTML = filtered.map(snippet => {
         const catInfo = categories.find(c => c.id === snippet.category);
         const catLabel = catInfo ? catInfo.label : snippet.category;
+        const currentTab = activeTabs.get(snippet.id) || "good";
+        const hasBadCode = !!snippet.badCode;
+
+        let levelClass = "badge-level-iniciante";
+        if (snippet.level === "Intermediário") levelClass = "badge-level-intermediario";
+        if (snippet.level === "Avançado") levelClass = "badge-level-avancado";
+
+        const codeToDisplay = (currentTab === "bad" && hasBadCode) ? snippet.badCode : snippet.code;
 
         return \`
           <div class="card" id="card-\${snippet.id}">
-            <div class="card-header">
+            <div class="card-top-row">
               <div class="card-title">\${escapeHtml(snippet.title)}</div>
-              <span class="card-category-badge">\${escapeHtml(catLabel)}</span>
+              <div class="badges-group">
+                \${snippet.level ? \`<span class="badge-pill \${levelClass}">\${escapeHtml(snippet.level)}</span>\` : ''}
+                <span class="badge-pill badge-cat">\${escapeHtml(catLabel)}</span>
+              </div>
             </div>
 
             <div class="card-summary">\${escapeHtml(snippet.summary)}</div>
@@ -429,17 +576,34 @@ function getSidebarHtml(currentLangId) {
               <strong>💡 Conceito Didático:</strong> \${escapeHtml(snippet.explanation)}
             </div>
 
-            <div class="code-container">
+            \${hasBadCode ? \`
+              <div class="code-tabs">
+                <button class="code-tab-btn \${currentTab === 'good' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'good')">
+                  ✅ Código Recomendado
+                </button>
+                <button class="code-tab-btn \${currentTab === 'bad' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'bad')">
+                  ❌ O Que Evitar (Anti-padrão)
+                </button>
+              </div>
+            \` : ''}
+
+            <div class="code-container" style="\${!hasBadCode ? 'border-radius: 6px; border-top: 1px solid var(--vscode-panel-border, #333);' : ''}">
               <div class="code-actions-bar">
-                <button class="action-btn btn-copy" onclick="copySnippet('\${snippet.id}')">
+                <button class="action-btn btn-copy" onclick="copySnippetCode('\${snippet.id}', '\${currentTab}')">
                   📋 Copiar
                 </button>
-                <button class="action-btn btn-insert" onclick="insertSnippet('\${snippet.id}')">
+                <button class="action-btn btn-insert" onclick="insertSnippetCode('\${snippet.id}', '\${currentTab}')">
                   ⚡ Inserir no Editor
                 </button>
               </div>
-              <pre><code>\${escapeHtml(snippet.code)}</code></pre>
+              <pre><code>\${highlightCode(codeToDisplay)}</code></pre>
             </div>
+
+            \${currentTab === 'bad' && snippet.badCodeExplanation ? \`
+              <div class="pitfall-box">
+                <strong>Por que evitar:</strong> \${escapeHtml(snippet.badCodeExplanation)}
+              </div>
+            \` : ''}
 
             \${snippet.bestPractices && snippet.bestPractices.length > 0 ? \`
               <div class="section-title">Boas Práticas</div>
@@ -457,7 +621,7 @@ function getSidebarHtml(currentLangId) {
 
             \${snippet.completionTrigger ? \`
               <div class="trigger-hint">
-                <span>Completar no editor:</span>
+                <span>Atalho no editor:</span>
                 <span class="trigger-code">\${escapeHtml(snippet.completionTrigger)}</span>
               </div>
             \` : ''}
@@ -466,29 +630,35 @@ function getSidebarHtml(currentLangId) {
       }).join('');
     }
 
-    window.copySnippet = function(snippetId) {
+    window.switchSnippetTab = function(snippetId, tab) {
+      activeTabs.set(snippetId, tab);
+      render();
+    };
+
+    window.copySnippetCode = function(snippetId, tab) {
       const lang = languages.find(l => l.id === currentLanguageId);
       const snippet = lang?.snippets.find(s => s.id === snippetId);
       if (!snippet) return;
-      
-      navigator.clipboard.writeText(snippet.code).then(() => {
+
+      const code = (tab === 'bad' && snippet.badCode) ? snippet.badCode : snippet.code;
+      navigator.clipboard.writeText(code).then(() => {
         vscode.postMessage({ command: "notify", text: "Código copiado para a área de transferência!" });
       });
     };
 
-    window.insertSnippet = function(snippetId) {
+    window.insertSnippetCode = function(snippetId, tab) {
       const lang = languages.find(l => l.id === currentLanguageId);
       const snippet = lang?.snippets.find(s => s.id === snippetId);
       if (!snippet) return;
 
+      const code = (tab === 'bad' && snippet.badCode) ? snippet.badCode : snippet.code;
       vscode.postMessage({
         command: "insertCode",
-        code: snippet.code,
+        code: code,
         title: snippet.title
       });
     };
 
-    // Receive messages from extension host
     window.addEventListener("message", event => {
       const message = event.data;
       if (message.command === "setLanguage") {
@@ -497,6 +667,8 @@ function getSidebarHtml(currentLangId) {
         render();
       }
     });
+
+    render();
   </script>
 </body>
 </html>`;

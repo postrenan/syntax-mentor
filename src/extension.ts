@@ -3,9 +3,11 @@ import { ALL_LANGUAGES, getLanguageByFilename, getLanguageById, getLanguageByVsC
 import { SidebarWebviewProvider } from './providers/SidebarWebviewProvider';
 import { RealTimeCompletionProvider } from './providers/RealTimeCompletionProvider';
 import { DidacticHoverProvider } from './providers/HoverProvider';
+import { RealTimeAnalyzer } from './analyzer/RealTimeAnalyzer';
+import { DidacticCodeActionProvider } from './providers/CodeActionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Syntax Mentor está ativo e pronto para auxiliar no desenvolvimento!');
+  console.log('Syntax Mentor está ativo com Analisador Didático em Tempo Real!');
 
   // 1. Sidebar Webview Provider
   const sidebarProvider = new SidebarWebviewProvider(context.extensionUri);
@@ -16,10 +18,35 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  // 2. Real-Time Completion & Analyzer Provider
-  const completionProvider = new RealTimeCompletionProvider();
-  const hoverProvider = new DidacticHoverProvider();
+  // 2. Real-Time Analyzer & Diagnostics
+  const analyzer = new RealTimeAnalyzer();
+  context.subscriptions.push(analyzer.getDiagnosticCollection());
 
+  // Analyze active editor on start
+  if (vscode.window.activeTextEditor) {
+    analyzer.analyzeDocument(vscode.window.activeTextEditor.document);
+  }
+
+  // Listen to document changes in real time
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(event => {
+      analyzer.analyzeDocument(event.document);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(document => {
+      analyzer.analyzeDocument(document);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.workspace.onDidCloseTextDocument(document => {
+      analyzer.clearDocument(document);
+    })
+  );
+
+  // 3. QuickFix / CodeAction Provider (Lightbulb 💡)
   const supportedLanguages = [
     'java',
     'python',
@@ -31,6 +58,23 @@ export function activate(context: vscode.ExtensionContext) {
     'go',
     'rust'
   ];
+
+  const codeActionProvider = new DidacticCodeActionProvider();
+  for (const langId of supportedLanguages) {
+    context.subscriptions.push(
+      vscode.languages.registerCodeActionsProvider(
+        langId,
+        codeActionProvider,
+        {
+          providedCodeActionKinds: DidacticCodeActionProvider.providedCodeActionKinds
+        }
+      )
+    );
+  }
+
+  // 4. Real-Time Completion & Hover Providers
+  const completionProvider = new RealTimeCompletionProvider();
+  const hoverProvider = new DidacticHoverProvider();
 
   for (const langId of supportedLanguages) {
     context.subscriptions.push(
@@ -49,14 +93,19 @@ export function activate(context: vscode.ExtensionContext) {
     );
   }
 
-  // 3. Command: Open Guide
+  // 5. Commands
   context.subscriptions.push(
     vscode.commands.registerCommand('syntax-mentor.openGuide', () => {
       vscode.commands.executeCommand('syntax-mentor.sidebarView.focus');
     })
   );
 
-  // 4. Command: Select Language via Quick Pick
+  context.subscriptions.push(
+    vscode.commands.registerCommand('syntax-mentor.createTestFile', async (languageId?: string) => {
+      await sidebarProvider.createScratchTestFile(languageId || sidebarProvider.getCurrentLanguageId());
+    })
+  );
+
   context.subscriptions.push(
     vscode.commands.registerCommand('syntax-mentor.selectLanguage', async () => {
       const items = ALL_LANGUAGES.map(lang => ({
@@ -77,7 +126,6 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // 5. Command: Insert Snippet (Used by Webview & Hovers)
   context.subscriptions.push(
     vscode.commands.registerCommand('syntax-mentor.insertSnippet', async (code?: string) => {
       if (!code) {
@@ -85,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
-        vscode.window.showWarningMessage('Nenhum editor de texto aberto para inserir o snippet.');
+        await sidebarProvider.createScratchTestFile(sidebarProvider.getCurrentLanguageId());
         return;
       }
 

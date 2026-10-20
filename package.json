@@ -60,6 +60,11 @@
         "category": "Syntax Mentor"
       },
       {
+        "command": "syntax-mentor.createTestFile",
+        "title": "Syntax Mentor: Criar Arquivo de Teste Rápido",
+        "category": "Syntax Mentor"
+      },
+      {
         "command": "syntax-mentor.insertSnippet",
         "title": "Syntax Mentor: Inserir Snippet Didático no Editor",
         "category": "Syntax Mentor"

@@ -8,6 +8,8 @@ export type CategoryKey =
   | 'error_handling'
   | 'async_concurrency';
 
+export type DifficultyLevel = 'Iniciante' | 'Intermediário' | 'Avançado';
+
 export interface CategoryInfo {
   id: CategoryKey;
   label: string;
@@ -71,11 +73,14 @@ export interface DidacticSnippet {
   title: string;
   summary: string;
   category: CategoryKey;
+  level?: DifficultyLevel;
   code: string;
+  badCode?: string; // Anti-padrão didático correspondente (O que NÃO fazer)
+  badCodeExplanation?: string;
   explanation: string;
   bestPractices: string[];
   commonPitfalls?: string[];
-  completionTrigger?: string; // Ex: "str-ops", "array-list", "stream-map"
+  completionTrigger?: string;
   keywords: string[];
 }
 

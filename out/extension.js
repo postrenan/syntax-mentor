@@ -40,14 +40,31 @@ const languages_1 = require("./data/languages");
 const SidebarWebviewProvider_1 = require("./providers/SidebarWebviewProvider");
 const RealTimeCompletionProvider_1 = require("./providers/RealTimeCompletionProvider");
 const HoverProvider_1 = require("./providers/HoverProvider");
+const RealTimeAnalyzer_1 = require("./analyzer/RealTimeAnalyzer");
+const CodeActionProvider_1 = require("./providers/CodeActionProvider");
 function activate(context) {
-    console.log('Syntax Mentor está ativo e pronto para auxiliar no desenvolvimento!');
+    console.log('Syntax Mentor está ativo com Analisador Didático em Tempo Real!');
     // 1. Sidebar Webview Provider
     const sidebarProvider = new SidebarWebviewProvider_1.SidebarWebviewProvider(context.extensionUri);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarWebviewProvider_1.SidebarWebviewProvider.viewType, sidebarProvider));
-    // 2. Real-Time Completion & Analyzer Provider
-    const completionProvider = new RealTimeCompletionProvider_1.RealTimeCompletionProvider();
-    const hoverProvider = new HoverProvider_1.DidacticHoverProvider();
+    // 2. Real-Time Analyzer & Diagnostics
+    const analyzer = new RealTimeAnalyzer_1.RealTimeAnalyzer();
+    context.subscriptions.push(analyzer.getDiagnosticCollection());
+    // Analyze active editor on start
+    if (vscode.window.activeTextEditor) {
+        analyzer.analyzeDocument(vscode.window.activeTextEditor.document);
+    }
+    // Listen to document changes in real time
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(event => {
+        analyzer.analyzeDocument(event.document);
+    }));
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(document => {
+        analyzer.analyzeDocument(document);
+    }));
+    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(document => {
+        analyzer.clearDocument(document);
+    }));
+    // 3. QuickFix / CodeAction Provider (Lightbulb 💡)
     const supportedLanguages = [
         'java',
         'python',
@@ -59,15 +76,26 @@ function activate(context) {
         'go',
         'rust'
     ];
+    const codeActionProvider = new CodeActionProvider_1.DidacticCodeActionProvider();
+    for (const langId of supportedLanguages) {
+        context.subscriptions.push(vscode.languages.registerCodeActionsProvider(langId, codeActionProvider, {
+            providedCodeActionKinds: CodeActionProvider_1.DidacticCodeActionProvider.providedCodeActionKinds
+        }));
+    }
+    // 4. Real-Time Completion & Hover Providers
+    const completionProvider = new RealTimeCompletionProvider_1.RealTimeCompletionProvider();
+    const hoverProvider = new HoverProvider_1.DidacticHoverProvider();
     for (const langId of supportedLanguages) {
         context.subscriptions.push(vscode.languages.registerCompletionItemProvider(langId, completionProvider, '.', ' ', '(', '[', ':', '"', '>', '-'));
         context.subscriptions.push(vscode.languages.registerHoverProvider(langId, hoverProvider));
     }
-    // 3. Command: Open Guide
+    // 5. Commands
     context.subscriptions.push(vscode.commands.registerCommand('syntax-mentor.openGuide', () => {
         vscode.commands.executeCommand('syntax-mentor.sidebarView.focus');
     }));
-    // 4. Command: Select Language via Quick Pick
+    context.subscriptions.push(vscode.commands.registerCommand('syntax-mentor.createTestFile', async (languageId) => {
+        await sidebarProvider.createScratchTestFile(languageId || sidebarProvider.getCurrentLanguageId());
+    }));
     context.subscriptions.push(vscode.commands.registerCommand('syntax-mentor.selectLanguage', async () => {
         const items = languages_1.ALL_LANGUAGES.map(lang => ({
             label: `$(code) ${lang.name}`,
@@ -83,14 +111,13 @@ function activate(context) {
             vscode.commands.executeCommand('syntax-mentor.sidebarView.focus');
         }
     }));
-    // 5. Command: Insert Snippet (Used by Webview & Hovers)
     context.subscriptions.push(vscode.commands.registerCommand('syntax-mentor.insertSnippet', async (code) => {
         if (!code) {
             return;
         }
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showWarningMessage('Nenhum editor de texto aberto para inserir o snippet.');
+            await sidebarProvider.createScratchTestFile(sidebarProvider.getCurrentLanguageId());
             return;
         }
         await editor.edit(editBuilder => {
