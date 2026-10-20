@@ -732,12 +732,7 @@ export function getSidebarHtml(
     </form>
   </div>
 
-  <div class="categories-bar" id="categoriesBar">
-    <div class="cat-pill active" data-cat="all">Todos</div>
-    ${CATEGORIES.map(cat => `
-      <div class="cat-pill" data-cat="${cat.id}">${cat.label}</div>
-    `).join('')}
-  </div>
+  <div class="categories-bar" id="categoriesBar"></div>
 
   <div class="snippets-container" id="snippetsContainer"></div>
 
@@ -830,6 +825,8 @@ export function getSidebarHtml(
       });
 
       closeModal();
+      renderCategoriesBar();
+      updateModalCategories();
       render();
     });
 
@@ -842,7 +839,10 @@ export function getSidebarHtml(
 
     langSelect.addEventListener("change", (e) => {
       currentLanguageId = e.target.value;
+      activeCategory = "all";
       vscode.postMessage({ command: "changeLanguage", languageId: currentLanguageId });
+      renderCategoriesBar();
+      updateModalCategories();
       render();
     });
 
@@ -854,11 +854,66 @@ export function getSidebarHtml(
     categoriesBar.addEventListener("click", (e) => {
       const pill = e.target.closest(".cat-pill");
       if (!pill) return;
-      document.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
-      pill.classList.add("active");
       activeCategory = pill.dataset.cat;
+      renderCategoriesBar();
       render();
     });
+
+    function renderCategoriesBar() {
+      const lang = languages.find(l => l.id === currentLanguageId) || languages[0];
+      const matchingCustom = userCustomTips.filter(t => t.languageId === currentLanguageId);
+      const combined = [...matchingCustom, ...lang.snippets];
+
+      const presentCatIds = new Set(combined.map(s => s.category));
+
+      if (activeCategory !== "all" && !presentCatIds.has(activeCategory)) {
+        activeCategory = "all";
+      }
+
+      const availableCategories = categories.filter(c => presentCatIds.has(c.id));
+
+      let html = \`<div class="cat-pill \${activeCategory === 'all' ? 'active' : ''}" data-cat="all">Todos (\${combined.length})</div>\`;
+
+      for (const cat of availableCategories) {
+        const count = combined.filter(s => s.category === cat.id).length;
+        const isActive = activeCategory === cat.id ? 'active' : '';
+        html += \`<div class="cat-pill \${isActive}" data-cat="\${cat.id}">\${escapeHtml(cat.label)} (\${count})</div>\`;
+      }
+
+      categoriesBar.innerHTML = html;
+    }
+
+    function updateModalCategories() {
+      const lang = languages.find(l => l.id === currentLanguageId) || languages[0];
+      const matchingCustom = userCustomTips.filter(t => t.languageId === currentLanguageId);
+      const combined = [...matchingCustom, ...lang.snippets];
+      const presentCatIds = new Set(combined.map(s => s.category));
+
+      const tipCategorySelect = document.getElementById("tipCategory");
+      if (!tipCategorySelect) return;
+
+      const present = categories.filter(c => presentCatIds.has(c.id));
+      const others = categories.filter(c => !presentCatIds.has(c.id));
+
+      let html = "";
+      if (present.length > 0) {
+        html += \`<optgroup label="Recomendadas para \${escapeHtml(lang.name)}">\`;
+        for (const c of present) {
+          html += \`<option value="\${c.id}">\${escapeHtml(c.label)}</option>\`;
+        }
+        html += \`</optgroup>\`;
+      }
+
+      if (others.length > 0) {
+        html += \`<optgroup label="Outras Categorias">\`;
+        for (const c of others) {
+          html += \`<option value="\${c.id}">\${escapeHtml(c.label)}</option>\`;
+        }
+        html += \`</optgroup>\`;
+      }
+
+      tipCategorySelect.innerHTML = html;
+    }
 
     let allExpanded = false;
     btnToggleAll.addEventListener("click", () => {
@@ -1103,6 +1158,8 @@ export function getSidebarHtml(
         snippetId: snippetId
       });
 
+      renderCategoriesBar();
+      updateModalCategories();
       render();
     };
 
@@ -1145,16 +1202,23 @@ export function getSidebarHtml(
       if (message.command === "setLanguage") {
         currentLanguageId = message.languageId;
         langSelect.value = message.languageId;
+        activeCategory = "all";
+        renderCategoriesBar();
+        updateModalCategories();
         render();
       } else if (message.command === "updatePins") {
         pinnedTipIds = message.pinnedTipIds;
         render();
       } else if (message.command === "updateCustomTips") {
         userCustomTips = message.customTips;
+        renderCategoriesBar();
+        updateModalCategories();
         render();
       }
     });
 
+    renderCategoriesBar();
+    updateModalCategories();
     render();
   </script>
 </body>
