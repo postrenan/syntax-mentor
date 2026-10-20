@@ -37,6 +37,7 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const languages_1 = require("./data/languages");
+const CustomTipsManager_1 = require("./data/CustomTipsManager");
 const SidebarWebviewProvider_1 = require("./providers/SidebarWebviewProvider");
 const RealTimeCompletionProvider_1 = require("./providers/RealTimeCompletionProvider");
 const HoverProvider_1 = require("./providers/HoverProvider");
@@ -44,6 +45,8 @@ const RealTimeAnalyzer_1 = require("./analyzer/RealTimeAnalyzer");
 const CodeActionProvider_1 = require("./providers/CodeActionProvider");
 function activate(context) {
     console.log('Syntax Mentor está ativo com Analisador Didático em Tempo Real!');
+    // 0. Initialize Custom Tips & Pins Persistence
+    CustomTipsManager_1.CustomTipsManager.initialize(context);
     // 1. Sidebar Webview Provider
     const sidebarProvider = new SidebarWebviewProvider_1.SidebarWebviewProvider(context.extensionUri);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(SidebarWebviewProvider_1.SidebarWebviewProvider.viewType, sidebarProvider));

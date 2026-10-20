@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageByFilename, getLanguageById, getLanguageByVsCodeId } from '../data/languages';
+import { CustomTipsManager } from '../data/CustomTipsManager';
 import { getSidebarHtml } from '../webview/webviewContent';
 
 export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
@@ -32,7 +33,11 @@ export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
       }
     }
 
-    webviewView.webview.html = getSidebarHtml(this._currentLanguageId);
+    const tipsManager = CustomTipsManager.getInstance();
+    const pinned = tipsManager ? tipsManager.getPinnedTips() : [];
+    const customTips = tipsManager ? tipsManager.getCustomTips() : [];
+
+    webviewView.webview.html = getSidebarHtml(this._currentLanguageId, pinned, customTips);
 
     // Message handler from webview
     webviewView.webview.onDidReceiveMessage(async (data) => {
@@ -51,6 +56,31 @@ export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
         }
         case 'createTestFile': {
           await this.createScratchTestFile(data.languageId || this._currentLanguageId);
+          break;
+        }
+        case 'togglePin': {
+          if (tipsManager) {
+            const isPinned = await tipsManager.togglePin(data.snippetId);
+            vscode.window.showInformationMessage(
+              isPinned ? '📌 Tip fixado no topo com sucesso!' : '📍 Tip desafixado do topo.'
+            );
+          }
+          break;
+        }
+        case 'saveCustomTip': {
+          if (tipsManager) {
+            await tipsManager.saveCustomTip(data.tip);
+            vscode.window.showInformationMessage(
+              `⭐ Tip "${data.tip.title}" salvo com sucesso e disponível no catálogo e autocompletar!`
+            );
+          }
+          break;
+        }
+        case 'deleteCustomTip': {
+          if (tipsManager) {
+            await tipsManager.deleteCustomTip(data.snippetId);
+            vscode.window.showInformationMessage('🗑️ Tip personalizado removido com sucesso.');
+          }
           break;
         }
       }
@@ -101,7 +131,6 @@ export class SidebarWebviewProvider implements vscode.WebviewViewProvider {
   private async insertCodeIntoEditor(code: string, title?: string) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      // If no editor is open, offer to create one!
       await this.createScratchTestFile(this._currentLanguageId);
       return;
     }

@@ -3,10 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSidebarHtml = getSidebarHtml;
 const languages_1 = require("../data/languages");
 const types_1 = require("../types");
-function getSidebarHtml(currentLangId) {
+function getSidebarHtml(currentLangId, pinnedIds = [], customTips = []) {
     const currentLang = (0, languages_1.getLanguageById)(currentLangId) || languages_1.ALL_LANGUAGES[0];
     const languagesJson = JSON.stringify(languages_1.ALL_LANGUAGES);
     const categoriesJson = JSON.stringify(types_1.CATEGORIES);
+    const pinnedJson = JSON.stringify(pinnedIds);
+    const customTipsJson = JSON.stringify(customTips);
     return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -44,7 +46,7 @@ function getSidebarHtml(currentLangId) {
 
     .selector-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
 
@@ -65,23 +67,29 @@ function getSidebarHtml(currentLangId) {
       border-color: var(--vscode-focusBorder);
     }
 
-    .btn-create-test {
-      padding: 7px 10px;
+    .btn-action-top {
+      padding: 7px 9px;
       border-radius: 4px;
       background: var(--vscode-button-secondaryBackground, #3a3d41);
       color: var(--vscode-button-secondaryForeground, #ffffff);
       border: none;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11.5px;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
       gap: 4px;
       font-weight: 500;
+      transition: filter 0.15s;
     }
 
-    .btn-create-test:hover {
+    .btn-action-top:hover {
       filter: brightness(1.2);
+    }
+
+    .btn-create-tip {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
     }
 
     .search-box {
@@ -99,15 +107,25 @@ function getSidebarHtml(currentLangId) {
       border-color: var(--vscode-focusBorder);
     }
 
-    /* Stats Bar */
-    .stats-bar {
+    /* Controls Bar: Collapse all toggle + Stats */
+    .sub-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 11px;
       color: var(--vscode-descriptionForeground);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       padding: 0 2px;
+    }
+
+    .btn-toggle-all {
+      background: transparent;
+      border: none;
+      color: var(--vscode-textLink-foreground, #3794ff);
+      cursor: pointer;
+      font-size: 11px;
+      text-decoration: underline;
+      padding: 2px 0;
     }
 
     /* Category Pills */
@@ -151,39 +169,197 @@ function getSidebarHtml(currentLangId) {
       filter: brightness(1.2);
     }
 
+    /* Modal / Form para criar tip */
+    .custom-modal {
+      display: none;
+      background: var(--vscode-editor-background);
+      border: 1px solid var(--vscode-focusBorder, #007acc);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .custom-modal.visible {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-title {
+      font-size: 13.5px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--vscode-editor-foreground);
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--vscode-descriptionForeground);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 4px;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border);
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-textarea {
+      font-family: var(--code-font);
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
     /* Cards */
     .snippets-container {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
 
     .card {
       background: var(--vscode-editor-background);
       border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
       border-radius: 8px;
-      padding: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
       transition: border-color 0.15s, box-shadow 0.15s;
+      overflow: hidden;
+    }
+
+    .card.is-pinned {
+      border: 1.5px solid #e5c07b;
+      box-shadow: 0 2px 8px rgba(229, 192, 123, 0.2);
     }
 
     .card:hover {
       border-color: var(--vscode-focusBorder);
     }
 
+    /* Collapsible Card Header */
+    .card-header-bar {
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: background 0.15s;
+    }
+
+    .card-header-bar:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
     .card-top-row {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
+      align-items: center;
       gap: 8px;
     }
 
+    .card-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .collapse-icon {
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground);
+      transition: transform 0.2s ease;
+      display: inline-block;
+      width: 14px;
+      text-align: center;
+    }
+
+    .card.is-open .collapse-icon {
+      transform: rotate(90deg);
+    }
+
     .card-title {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 600;
       color: var(--vscode-editor-foreground);
       line-height: 1.3;
+    }
+
+    .card-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-pin {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      color: var(--vscode-descriptionForeground);
+      transition: transform 0.15s, color 0.15s;
+      outline: none;
+    }
+
+    .btn-pin:hover {
+      transform: scale(1.2);
+      color: #e5c07b;
+    }
+
+    .btn-pin.pinned {
+      color: #e5c07b;
+      font-weight: bold;
+    }
+
+    .btn-delete-tip {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #f44336;
+      opacity: 0.7;
+    }
+
+    .btn-delete-tip:hover {
+      opacity: 1;
+      transform: scale(1.15);
     }
 
     .badges-group {
@@ -191,6 +367,7 @@ function getSidebarHtml(currentLangId) {
       gap: 5px;
       align-items: center;
       flex-wrap: wrap;
+      margin-left: 22px;
     }
 
     .badge-pill {
@@ -199,6 +376,19 @@ function getSidebarHtml(currentLangId) {
       border-radius: 4px;
       white-space: nowrap;
       font-weight: 500;
+    }
+
+    .badge-pinned {
+      background: rgba(229, 192, 123, 0.25);
+      color: #e5c07b;
+      border: 1px solid rgba(229, 192, 123, 0.4);
+      font-weight: 600;
+    }
+
+    .badge-custom {
+      background: rgba(33, 150, 243, 0.25);
+      color: #64b5f6;
+      border: 1px solid rgba(33, 150, 243, 0.4);
     }
 
     .badge-cat {
@@ -226,9 +416,35 @@ function getSidebarHtml(currentLangId) {
       border: 1px solid rgba(186, 104, 200, 0.3);
     }
 
-    .card-summary {
+    .card-preview-summary {
+      font-size: 12px;
+      color: var(--vscode-descriptionForeground);
+      margin-left: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Collapsible Body */
+    .card-body {
+      display: none;
+      padding: 0 14px 14px 14px;
+      border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.15));
+      animation: expandAnim 0.15s ease-out;
+    }
+
+    .card.is-open .card-body {
+      display: block;
+    }
+
+    @keyframes expandAnim {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .card-summary-full {
       font-size: 12.5px;
-      opacity: 0.92;
+      margin-top: 12px;
       margin-bottom: 10px;
       color: var(--vscode-descriptionForeground);
     }
@@ -334,37 +550,17 @@ function getSidebarHtml(currentLangId) {
       white-space: pre;
     }
 
-    /* ========================================================
-       ADVANCED SYNTAX HIGHLIGHTING (High-Contrast Theme Palette)
-       ======================================================== */
-    /* 1. Controle de Fluxo & Saltos (Magenta / Roxo) */
+    /* Semantic Highlighting Tokens */
     .hl-ctrl { color: #c586c0 !important; font-weight: 600; }
-
-    /* 2. Declarações, Modificadores & Palavras Reservadas Estruturais (Azul) */
     .hl-decl { color: #569cd6 !important; font-weight: 600; }
-
-    /* 3. Tipos Primitivos, Classes & Interfaces (Verde-Água / Teal) */
     .hl-type { color: #4ec9b0 !important; }
-
-    /* 4. Anotações & Decorators de Frameworks (Dourado / Mostarda) */
     .hl-anno { color: #e5c07b !important; font-weight: 500; }
-
-    /* 5. Strings, Literais de Texto & F-Strings (Laranja Terracota) */
     .hl-str { color: #ce9178 !important; }
-
-    /* 6. Números Inteiros & Decimais (Verde Claro Menta) */
     .hl-num { color: #b5cea8 !important; }
-
-    /* 7. Comentários (Verde Floresta / Itálico) */
     .hl-com { color: #6a9955 !important; font-style: italic; }
-
-    /* 8. Instruções Docker & SQL (Ciano Vibrante) */
-    .hl-dock-sql { color: #4fc1ff !important; font-weight: 700; letter-spacing: 0.3px; }
-
-    /* 9. Nomes de Funções e Chamadas (Amarelo Claro) */
+    .hl-dock-sql { color: #4fc1ff !important; font-weight: 700; }
     .hl-fn { color: #dcdcaa !important; }
 
-    /* Checklist & Warnings */
     .section-title {
       font-size: 11px;
       font-weight: bold;
@@ -443,17 +639,93 @@ function getSidebarHtml(currentLangId) {
           </option>
         `).join('')}
       </select>
-      <button id="btnCreateTest" class="btn-create-test" title="Criar arquivo de rascunho para testar">
+      <button id="btnOpenNewTipModal" class="btn-action-top btn-create-tip" title="Criar meu próprio tip para esta linguagem">
+        ➕ Criar Tip
+      </button>
+      <button id="btnCreateTest" class="btn-action-top" title="Criar arquivo de rascunho para testar">
         📄 Testar
       </button>
     </div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: spring, docker, join, string)..." />
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Filtrar tópicos (ex: spring, string, array, erro)..." />
 
-    <div class="stats-bar">
+    <div class="sub-bar">
       <span id="topicCountPill">Carregando tópicos...</span>
-      <span id="analyzerActivePill">⚡ Analisador em Tempo Real Ativo</span>
+      <button id="btnToggleAll" class="btn-toggle-all">🔽 Expandir Todos</button>
     </div>
+  </div>
+
+  <!-- Form Modal: Criar Novo Tip Personalizado -->
+  <div id="customTipModal" class="custom-modal">
+    <div class="modal-title">
+      <span>➕ Novo Tip Personalizado</span>
+      <button type="button" id="btnCloseModal" style="background:transparent; border:none; color:var(--vscode-descriptionForeground); cursor:pointer; font-size:16px;">✕</button>
+    </div>
+
+    <form id="customTipForm">
+      <div class="form-group">
+        <label>Título do Conceito / Tip:</label>
+        <input type="text" id="tipTitle" class="form-input" placeholder="Ex: Utilitário de Data com LocalDate" required />
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <div class="form-group" style="flex:1;">
+          <label>Categoria:</label>
+          <select id="tipCategory" class="form-select">
+            ${types_1.CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="form-group" style="flex:1;">
+          <label>Nível de Dificuldade:</label>
+          <select id="tipLevel" class="form-select">
+            <option value="Iniciante">Iniciante</option>
+            <option value="Intermediário" selected>Intermediário</option>
+            <option value="Avançado">Avançado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Resumo Curto:</label>
+        <input type="text" id="tipSummary" class="form-input" placeholder="Breve resumo em uma frase" required />
+      </div>
+
+      <div class="form-group">
+        <label>Explicação Didática:</label>
+        <textarea id="tipExplanation" class="form-textarea" placeholder="Explique como e por que usar este padrão..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Código Recomendado:</label>
+        <textarea id="tipCode" class="form-textarea" style="min-height:90px;" placeholder="// Digite o código de exemplo..." required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>O Que Evitar (Anti-Padrão - Opcional):</label>
+        <textarea id="tipBadCode" class="form-textarea" placeholder="// Código anti-padrão a evitar..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Por que evitar o anti-padrão (Opcional):</label>
+        <input type="text" id="tipBadCodeExplanation" class="form-input" placeholder="Ex: Causa vazamento de memória ou lentidão..." />
+      </div>
+
+      <div class="form-group">
+        <label>Boas Práticas (uma por linha):</label>
+        <textarea id="tipBestPractices" class="form-textarea" placeholder="Use sempre...\nEvite chamar..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Atalho de Autocompletar (Trigger):</label>
+        <input type="text" id="tipTrigger" class="form-input" placeholder="Ex: meu-util-data" />
+      </div>
+
+      <div class="modal-buttons">
+        <button type="button" id="btnCancelModal" class="action-btn btn-copy">Cancelar</button>
+        <button type="submit" class="action-btn btn-insert">Salvar Meu Tip</button>
+      </div>
+    </form>
   </div>
 
   <div class="categories-bar" id="categoriesBar">
@@ -469,10 +741,16 @@ function getSidebarHtml(currentLangId) {
     const vscode = acquireVsCodeApi();
     const languages = ${languagesJson};
     const categories = ${categoriesJson};
+    let pinnedTipIds = ${pinnedJson};
+    let userCustomTips = ${customTipsJson};
 
     let currentLanguageId = "${currentLang.id}";
     let activeCategory = "all";
     let searchQuery = "";
+
+    // Card open state: snippetId -> boolean (DEFAULT: false = FECHADOS!)
+    const cardOpenStates = new Map();
+    // Snippet active tab: snippetId -> "good" | "bad"
     const activeTabs = new Map();
 
     const langSelect = document.getElementById("langSelect");
@@ -480,7 +758,76 @@ function getSidebarHtml(currentLangId) {
     const categoriesBar = document.getElementById("categoriesBar");
     const container = document.getElementById("snippetsContainer");
     const topicCountPill = document.getElementById("topicCountPill");
+    const btnToggleAll = document.getElementById("btnToggleAll");
     const btnCreateTest = document.getElementById("btnCreateTest");
+
+    // Modal elements
+    const customTipModal = document.getElementById("customTipModal");
+    const btnOpenNewTipModal = document.getElementById("btnOpenNewTipModal");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const btnCancelModal = document.getElementById("btnCancelModal");
+    const customTipForm = document.getElementById("customTipForm");
+
+    btnOpenNewTipModal.addEventListener("click", () => {
+      customTipModal.classList.add("visible");
+      document.getElementById("tipTitle").focus();
+    });
+
+    function closeModal() {
+      customTipModal.classList.remove("visible");
+      customTipForm.reset();
+    }
+
+    btnCloseModal.addEventListener("click", closeModal);
+    btnCancelModal.addEventListener("click", closeModal);
+
+    customTipForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const title = document.getElementById("tipTitle").value.trim();
+      const category = document.getElementById("tipCategory").value;
+      const level = document.getElementById("tipLevel").value;
+      const summary = document.getElementById("tipSummary").value.trim();
+      const explanation = document.getElementById("tipExplanation").value.trim();
+      const code = document.getElementById("tipCode").value;
+      const badCode = document.getElementById("tipBadCode").value.trim();
+      const badCodeExplanation = document.getElementById("tipBadCodeExplanation").value.trim();
+      const bpText = document.getElementById("tipBestPractices").value.trim();
+      const trigger = document.getElementById("tipTrigger").value.trim();
+
+      const bestPractices = bpText ? bpText.split("\\n").map(s => s.trim()).filter(Boolean) : [];
+      const id = "custom-" + Date.now();
+
+      const newTip = {
+        id: id,
+        languageId: currentLanguageId,
+        title: title,
+        summary: summary,
+        category: category,
+        level: level,
+        code: code,
+        badCode: badCode || undefined,
+        badCodeExplanation: badCodeExplanation || undefined,
+        explanation: explanation,
+        bestPractices: bestPractices,
+        completionTrigger: trigger || ("custom-" + title.toLowerCase().replace(/\\s+/g, '-')),
+        keywords: [title.toLowerCase(), category, "meu tip", currentLanguageId],
+        isCustom: true,
+        createdAt: Date.now()
+      };
+
+      userCustomTips.unshift(newTip);
+      // Auto-open newly created tip
+      cardOpenStates.set(id, true);
+
+      vscode.postMessage({
+        command: "saveCustomTip",
+        tip: newTip
+      });
+
+      closeModal();
+      render();
+    });
 
     btnCreateTest.addEventListener("click", () => {
       vscode.postMessage({
@@ -509,6 +856,17 @@ function getSidebarHtml(currentLangId) {
       render();
     });
 
+    let allExpanded = false;
+    btnToggleAll.addEventListener("click", () => {
+      allExpanded = !allExpanded;
+      const currentList = getActiveSnippetsList();
+      for (const s of currentList) {
+        cardOpenStates.set(s.id, allExpanded);
+      }
+      btnToggleAll.textContent = allExpanded ? "🔼 Recolher Todos" : "🔽 Expandir Todos";
+      render();
+    });
+
     function escapeHtml(text) {
       if (!text) return "";
       return text
@@ -519,45 +877,40 @@ function getSidebarHtml(currentLangId) {
         .replace(/'/g, "&#039;");
     }
 
-    // High-contrast, semantic multi-token highlighter
     function highlightCode(code) {
       if (!code) return "";
       let html = escapeHtml(code);
 
-      // 1. Comments (Line comments: //, #, --)
+      // Comments
       html = html.replace(/(\\/{2}.*?$|#.*?$|--.*?$)/gm, '<span class="hl-com">$1</span>');
-
-      // 2. Strings & Characters (aspas duplas, simples e crases)
+      // Strings
       html = html.replace(/(&quot;[\\s\\S]*?&quot;|&#039;[\\s\\S]*?&#039;|\\x60[\\s\\S]*?\\x60)/g, '<span class="hl-str">$1</span>');
-
-      // 3. Annotations & Decorators (@RestController, @GetMapping, @Autowired, @Entity, @Override, etc.)
+      // Annotations
       html = html.replace(/(@[a-zA-Z0-9_]+)/g, '<span class="hl-anno">$1</span>');
-
-      // 4. Docker & SQL Directives (FROM, WORKDIR, COPY, RUN, SELECT, JOIN, WHERE, etc.)
+      // Docker & SQL
       const dockerSql = "\\b(FROM|WORKDIR|COPY|RUN|EXPOSE|ENTRYPOINT|CMD|ENV|VOLUME|USER|ARG|HEALTHCHECK|SELECT|INSERT|INTO|UPDATE|DELETE|SET|WHERE|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|ON|GROUP BY|ORDER BY|HAVING|LIMIT|OFFSET|BEGIN|COMMIT|ROLLBACK|TRANSACTION|CREATE|TABLE|INDEX|UNIQUE|DROP|ALTER|EXPLAIN|ANALYZE)\\b";
       html = html.replace(new RegExp(dockerSql, "g"), '<span class="hl-dock-sql">$1</span>');
-
-      // 5. Controle de Fluxo & Saltos (if, else, for, while, return, try, catch, etc.)
+      // Control flow
       const controlFlow = "\\b(if|else|switch|case|default|for|while|do|break|continue|return|throw|throws|try|catch|finally|yield|match|async|await)\\b";
       html = html.replace(new RegExp(controlFlow, "g"), '<span class="hl-ctrl">$1</span>');
-
-      // 6. Declarações & Modificadores Estruturais (public, class, new, def, fn, etc.)
+      // Declarations
       const declarations = "\\b(public|private|protected|static|final|abstract|class|record|interface|enum|extends|implements|new|import|package|def|fn|func|var|let|const|mut|struct|impl|trait|type|namespace|using|services|networks|volumes)\\b";
       html = html.replace(new RegExp(declarations, "g"), '<span class="hl-decl">$1</span>');
-
-      // 7. Tipos Primitivos, Classes & Interfaces
+      // Types
       const types = "\\b(String|StringBuilder|List|ArrayList|Map|HashMap|Set|HashSet|Integer|Double|Boolean|Long|Optional|ResponseEntity|ProblemDetail|UUID|JpaRepository|Task|Promise|Vec|Result|Option|int|double|boolean|char|byte|long|float|void)\\b";
       html = html.replace(new RegExp(types, "g"), '<span class="hl-type">$1</span>');
-
-      // 8. Números
+      // Numbers
       html = html.replace(/\\b(\\d+(?:\\.\\d+)?(?:[fLmd])?)\\b/g, '<span class="hl-num">$1</span>');
 
       return html;
     }
 
-    function render() {
+    function getActiveSnippetsList() {
       const lang = languages.find(l => l.id === currentLanguageId) || languages[0];
-      let filtered = lang.snippets;
+      const matchingCustom = userCustomTips.filter(t => t.languageId === currentLanguageId);
+      const combined = [...matchingCustom, ...lang.snippets];
+
+      let filtered = combined;
 
       if (activeCategory !== "all") {
         filtered = filtered.filter(s => s.category === activeCategory);
@@ -573,7 +926,26 @@ function getSidebarHtml(currentLangId) {
         });
       }
 
-      topicCountPill.textContent = \`📚 \${filtered.length} tópicos em \${lang.name}\`;
+      // SORTING: Pinned items appear FIRST!
+      filtered.sort((a, b) => {
+        const aPinned = pinnedTipIds.includes(a.id);
+        const bPinned = pinnedTipIds.includes(b.id);
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        if (aPinned && bPinned) {
+          return pinnedTipIds.indexOf(a.id) - pinnedTipIds.indexOf(b.id);
+        }
+        return 0;
+      });
+
+      return filtered;
+    }
+
+    function render() {
+      const lang = languages.find(l => l.id === currentLanguageId) || languages[0];
+      const filtered = getActiveSnippetsList();
+
+      topicCountPill.textContent = \`📚 \${filtered.length} tópicos (\${pinnedTipIds.filter(id => filtered.some(s => s.id === id)).length} fixados)\`;
 
       if (filtered.length === 0) {
         container.innerHTML = \`
@@ -587,6 +959,8 @@ function getSidebarHtml(currentLangId) {
       container.innerHTML = filtered.map(snippet => {
         const catInfo = categories.find(c => c.id === snippet.category);
         const catLabel = catInfo ? catInfo.label : snippet.category;
+        const isOpen = cardOpenStates.get(snippet.id) === true; // DEFAULT: FECHADO!
+        const isPinned = pinnedTipIds.includes(snippet.id);
         const currentTab = activeTabs.get(snippet.id) || "good";
         const hasBadCode = !!snippet.badCode;
 
@@ -597,83 +971,151 @@ function getSidebarHtml(currentLangId) {
         const codeToDisplay = (currentTab === "bad" && hasBadCode) ? snippet.badCode : snippet.code;
 
         return \`
-          <div class="card" id="card-\${snippet.id}">
-            <div class="card-top-row">
-              <div class="card-title">\${escapeHtml(snippet.title)}</div>
+          <div class="card \${isOpen ? 'is-open' : ''} \${isPinned ? 'is-pinned' : ''}" id="card-\${snippet.id}">
+            <!-- Collapsible Header -->
+            <div class="card-header-bar" onclick="toggleCard('\${snippet.id}')">
+              <div class="card-top-row">
+                <div class="card-title-wrap">
+                  <span class="collapse-icon">▶</span>
+                  <div class="card-title">\${escapeHtml(snippet.title)}</div>
+                </div>
+
+                <div class="card-actions-right" onclick="event.stopPropagation()">
+                  <button class="btn-pin \${isPinned ? 'pinned' : ''}" onclick="togglePinTip('\${snippet.id}')" title="\${isPinned ? 'Desafixar do topo' : 'Fixar no topo'}">
+                    \${isPinned ? '📌' : '📍'}
+                  </button>
+                  \${snippet.isCustom ? \`
+                    <button class="btn-delete-tip" onclick="deleteCustomTip('\${snippet.id}')" title="Excluir este tip personalizado">
+                      🗑️
+                    </button>
+                  \` : ''}
+                </div>
+              </div>
+
               <div class="badges-group">
+                \${isPinned ? '<span class="badge-pill badge-pinned">📌 Fixado</span>' : ''}
+                \${snippet.isCustom ? '<span class="badge-pill badge-custom">⭐ Meu Tip</span>' : ''}
                 \${snippet.level ? \`<span class="badge-pill \${levelClass}">\${escapeHtml(snippet.level)}</span>\` : ''}
                 <span class="badge-pill badge-cat">\${escapeHtml(catLabel)}</span>
               </div>
+
+              \${!isOpen ? \`
+                <div class="card-preview-summary">\${escapeHtml(snippet.summary)}</div>
+              \` : ''}
             </div>
 
-            <div class="card-summary">\${escapeHtml(snippet.summary)}</div>
+            <!-- Collapsible Body Content -->
+            <div class="card-body">
+              <div class="card-summary-full">\${escapeHtml(snippet.summary)}</div>
 
-            <div class="card-explanation">
-              <strong>💡 Conceito Didático:</strong> \${escapeHtml(snippet.explanation)}
+              <div class="card-explanation">
+                <strong>💡 Conceito Didático:</strong> \${escapeHtml(snippet.explanation)}
+              </div>
+
+              \${hasBadCode ? \`
+                <div class="code-tabs">
+                  <button class="code-tab-btn \${currentTab === 'good' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'good')">
+                    ✅ Código Recomendado
+                  </button>
+                  <button class="code-tab-btn \${currentTab === 'bad' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'bad')">
+                    ❌ O Que Evitar (Anti-padrão)
+                  </button>
+                </div>
+              \` : ''}
+
+              <div class="code-container" style="\${!hasBadCode ? 'border-radius: 6px; border-top: 1px solid var(--vscode-panel-border, #333);' : ''}">
+                <div class="code-actions-bar">
+                  <button class="action-btn btn-copy" onclick="copySnippetCode('\${snippet.id}', '\${currentTab}')">
+                    📋 Copiar
+                  </button>
+                  <button class="action-btn btn-insert" onclick="insertSnippetCode('\${snippet.id}', '\${currentTab}')">
+                    ⚡ Inserir no Editor
+                  </button>
+                </div>
+                <pre><code>\${highlightCode(codeToDisplay)}</code></pre>
+              </div>
+
+              \${currentTab === 'bad' && snippet.badCodeExplanation ? \`
+                <div class="pitfall-box">
+                  <strong>Por que evitar:</strong> \${escapeHtml(snippet.badCodeExplanation)}
+                </div>
+              \` : ''}
+
+              \${snippet.bestPractices && snippet.bestPractices.length > 0 ? \`
+                <div class="section-title">Boas Práticas</div>
+                <ul class="best-practices-list">
+                  \${snippet.bestPractices.map(bp => \`<li>\${escapeHtml(bp)}</li>\`).join('')}
+                </ul>
+              \` : ''}
+
+              \${snippet.commonPitfalls && snippet.commonPitfalls.length > 0 ? \`
+                <div class="section-title" style="color: #f44336;">Atenção & Pegadinhas</div>
+                \${snippet.commonPitfalls.map(cp => \`
+                  <div class="pitfall-box">⚠️ \${escapeHtml(cp)}</div>
+                \`).join('')}
+              \` : ''}
+
+              \${snippet.completionTrigger ? \`
+                <div class="trigger-hint">
+                  <span>Atalho no editor:</span>
+                  <span class="trigger-code">\${escapeHtml(snippet.completionTrigger)}</span>
+                </div>
+              \` : ''}
             </div>
-
-            \${hasBadCode ? \`
-              <div class="code-tabs">
-                <button class="code-tab-btn \${currentTab === 'good' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'good')">
-                  ✅ Código Recomendado
-                </button>
-                <button class="code-tab-btn \${currentTab === 'bad' ? 'active' : ''}" onclick="switchSnippetTab('\${snippet.id}', 'bad')">
-                  ❌ O Que Evitar (Anti-padrão)
-                </button>
-              </div>
-            \` : ''}
-
-            <div class="code-container" style="\${!hasBadCode ? 'border-radius: 6px; border-top: 1px solid var(--vscode-panel-border, #333);' : ''}">
-              <div class="code-actions-bar">
-                <button class="action-btn btn-copy" onclick="copySnippetCode('\${snippet.id}', '\${currentTab}')">
-                  📋 Copiar
-                </button>
-                <button class="action-btn btn-insert" onclick="insertSnippetCode('\${snippet.id}', '\${currentTab}')">
-                  ⚡ Inserir no Editor
-                </button>
-              </div>
-              <pre><code>\${highlightCode(codeToDisplay)}</code></pre>
-            </div>
-
-            \${currentTab === 'bad' && snippet.badCodeExplanation ? \`
-              <div class="pitfall-box">
-                <strong>Por que evitar:</strong> \${escapeHtml(snippet.badCodeExplanation)}
-              </div>
-            \` : ''}
-
-            \${snippet.bestPractices && snippet.bestPractices.length > 0 ? \`
-              <div class="section-title">Boas Práticas</div>
-              <ul class="best-practices-list">
-                \${snippet.bestPractices.map(bp => \`<li>\${escapeHtml(bp)}</li>\`).join('')}
-              </ul>
-            \` : ''}
-
-            \${snippet.commonPitfalls && snippet.commonPitfalls.length > 0 ? \`
-              <div class="section-title" style="color: #f44336;">Atenção & Pegadinhas</div>
-              \${snippet.commonPitfalls.map(cp => \`
-                <div class="pitfall-box">⚠️ \${escapeHtml(cp)}</div>
-              \`).join('')}
-            \` : ''}
-
-            \${snippet.completionTrigger ? \`
-              <div class="trigger-hint">
-                <span>Atalho no editor:</span>
-                <span class="trigger-code">\${escapeHtml(snippet.completionTrigger)}</span>
-              </div>
-            \` : ''}
           </div>
         \`;
       }).join('');
     }
+
+    window.toggleCard = function(snippetId) {
+      const current = cardOpenStates.get(snippetId) === true;
+      cardOpenStates.set(snippetId, !current);
+      render();
+    };
+
+    window.togglePinTip = function(snippetId) {
+      const idx = pinnedTipIds.indexOf(snippetId);
+      if (idx >= 0) {
+        pinnedTipIds.splice(idx, 1);
+      } else {
+        pinnedTipIds.unshift(snippetId);
+      }
+
+      vscode.postMessage({
+        command: "togglePin",
+        snippetId: snippetId
+      });
+
+      render();
+    };
+
+    window.deleteCustomTip = function(snippetId) {
+      userCustomTips = userCustomTips.filter(t => t.id !== snippetId);
+      pinnedTipIds = pinnedTipIds.filter(id => id !== snippetId);
+      cardOpenStates.delete(snippetId);
+
+      vscode.postMessage({
+        command: "deleteCustomTip",
+        snippetId: snippetId
+      });
+
+      render();
+    };
 
     window.switchSnippetTab = function(snippetId, tab) {
       activeTabs.set(snippetId, tab);
       render();
     };
 
-    window.copySnippetCode = function(snippetId, tab) {
+    function findSnippet(snippetId) {
+      const custom = userCustomTips.find(s => s.id === snippetId);
+      if (custom) return custom;
       const lang = languages.find(l => l.id === currentLanguageId);
-      const snippet = lang?.snippets.find(s => s.id === snippetId);
+      return lang?.snippets.find(s => s.id === snippetId);
+    }
+
+    window.copySnippetCode = function(snippetId, tab) {
+      const snippet = findSnippet(snippetId);
       if (!snippet) return;
 
       const code = (tab === 'bad' && snippet.badCode) ? snippet.badCode : snippet.code;
@@ -683,8 +1125,7 @@ function getSidebarHtml(currentLangId) {
     };
 
     window.insertSnippetCode = function(snippetId, tab) {
-      const lang = languages.find(l => l.id === currentLanguageId);
-      const snippet = lang?.snippets.find(s => s.id === snippetId);
+      const snippet = findSnippet(snippetId);
       if (!snippet) return;
 
       const code = (tab === 'bad' && snippet.badCode) ? snippet.badCode : snippet.code;
@@ -700,6 +1141,12 @@ function getSidebarHtml(currentLangId) {
       if (message.command === "setLanguage") {
         currentLanguageId = message.languageId;
         langSelect.value = message.languageId;
+        render();
+      } else if (message.command === "updatePins") {
+        pinnedTipIds = message.pinnedTipIds;
+        render();
+      } else if (message.command === "updateCustomTips") {
+        userCustomTips = message.customTips;
         render();
       }
     });

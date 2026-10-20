@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidacticHoverProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const languages_1 = require("../data/languages");
+const CustomTipsManager_1 = require("../data/CustomTipsManager");
 class DidacticHoverProvider {
     provideHover(document, position, token) {
         const lang = (0, languages_1.getLanguageByVsCodeId)(document.languageId);
@@ -50,8 +51,10 @@ class DidacticHoverProvider {
         if (word.length < 3) {
             return null;
         }
+        const customTips = CustomTipsManager_1.CustomTipsManager.getInstance() ? CustomTipsManager_1.CustomTipsManager.getInstance().getCustomTips(lang.id) : [];
+        const allSnippets = [...customTips, ...lang.snippets];
         // Find snippet matching this word in keywords or titles
-        const matches = lang.snippets.filter(s => s.keywords.some(k => k.toLowerCase() === word || word.includes(k.toLowerCase())) ||
+        const matches = allSnippets.filter(s => s.keywords.some(k => k.toLowerCase() === word || word.includes(k.toLowerCase())) ||
             s.title.toLowerCase().includes(word));
         if (matches.length === 0) {
             return null;

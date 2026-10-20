@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ALL_LANGUAGES, getLanguageByFilename, getLanguageById, getLanguageByVsCodeId } from './data/languages';
+import { CustomTipsManager } from './data/CustomTipsManager';
 import { SidebarWebviewProvider } from './providers/SidebarWebviewProvider';
 import { RealTimeCompletionProvider } from './providers/RealTimeCompletionProvider';
 import { DidacticHoverProvider } from './providers/HoverProvider';
@@ -8,6 +9,9 @@ import { DidacticCodeActionProvider } from './providers/CodeActionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Syntax Mentor está ativo com Analisador Didático em Tempo Real!');
+
+  // 0. Initialize Custom Tips & Pins Persistence
+  CustomTipsManager.initialize(context);
 
   // 1. Sidebar Webview Provider
   const sidebarProvider = new SidebarWebviewProvider(context.extensionUri);

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageByVsCodeId } from '../data/languages';
+import { CustomTipsManager } from '../data/CustomTipsManager';
 
 export class DidacticHoverProvider implements vscode.HoverProvider {
   provideHover(
@@ -22,8 +23,11 @@ export class DidacticHoverProvider implements vscode.HoverProvider {
       return null;
     }
 
+    const customTips = CustomTipsManager.getInstance() ? CustomTipsManager.getInstance().getCustomTips(lang.id) : [];
+    const allSnippets = [...customTips, ...lang.snippets];
+
     // Find snippet matching this word in keywords or titles
-    const matches = lang.snippets.filter(s =>
+    const matches = allSnippets.filter(s =>
       s.keywords.some(k => k.toLowerCase() === word || word.includes(k.toLowerCase())) ||
       s.title.toLowerCase().includes(word)
     );

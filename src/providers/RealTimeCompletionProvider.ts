@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { getLanguageByVsCodeId } from '../data/languages';
+import { CustomTipsManager } from '../data/CustomTipsManager';
 import { DidacticSnippet } from '../types';
 
 export class RealTimeCompletionProvider implements vscode.CompletionItemProvider {
@@ -17,7 +18,11 @@ export class RealTimeCompletionProvider implements vscode.CompletionItemProvider
     const linePrefix = document.lineAt(position).text.substring(0, position.character).toLowerCase();
     const items: vscode.CompletionItem[] = [];
 
-    for (const snippet of lang.snippets) {
+    // Combine built-in snippets with user custom tips
+    const customTips = CustomTipsManager.getInstance() ? CustomTipsManager.getInstance().getCustomTips(lang.id) : [];
+    const allSnippets = [...customTips, ...lang.snippets];
+
+    for (const snippet of allSnippets) {
       // 1. Direct trigger completion (e.g. "java-string-pool" or "py-list-comprehension")
       const triggerItem = this.createCompletionItem(
         snippet.completionTrigger || snippet.id,

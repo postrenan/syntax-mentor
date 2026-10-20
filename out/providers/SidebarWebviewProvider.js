@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SidebarWebviewProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const languages_1 = require("../data/languages");
+const CustomTipsManager_1 = require("../data/CustomTipsManager");
 const webviewContent_1 = require("../webview/webviewContent");
 class SidebarWebviewProvider {
     _extensionUri;
@@ -60,7 +61,10 @@ class SidebarWebviewProvider {
                 this._currentLanguageId = detected.id;
             }
         }
-        webviewView.webview.html = (0, webviewContent_1.getSidebarHtml)(this._currentLanguageId);
+        const tipsManager = CustomTipsManager_1.CustomTipsManager.getInstance();
+        const pinned = tipsManager ? tipsManager.getPinnedTips() : [];
+        const customTips = tipsManager ? tipsManager.getCustomTips() : [];
+        webviewView.webview.html = (0, webviewContent_1.getSidebarHtml)(this._currentLanguageId, pinned, customTips);
         // Message handler from webview
         webviewView.webview.onDidReceiveMessage(async (data) => {
             switch (data.command) {
@@ -78,6 +82,27 @@ class SidebarWebviewProvider {
                 }
                 case 'createTestFile': {
                     await this.createScratchTestFile(data.languageId || this._currentLanguageId);
+                    break;
+                }
+                case 'togglePin': {
+                    if (tipsManager) {
+                        const isPinned = await tipsManager.togglePin(data.snippetId);
+                        vscode.window.showInformationMessage(isPinned ? '📌 Tip fixado no topo com sucesso!' : '📍 Tip desafixado do topo.');
+                    }
+                    break;
+                }
+                case 'saveCustomTip': {
+                    if (tipsManager) {
+                        await tipsManager.saveCustomTip(data.tip);
+                        vscode.window.showInformationMessage(`⭐ Tip "${data.tip.title}" salvo com sucesso e disponível no catálogo e autocompletar!`);
+                    }
+                    break;
+                }
+                case 'deleteCustomTip': {
+                    if (tipsManager) {
+                        await tipsManager.deleteCustomTip(data.snippetId);
+                        vscode.window.showInformationMessage('🗑️ Tip personalizado removido com sucesso.');
+                    }
                     break;
                 }
             }
@@ -119,7 +144,6 @@ class SidebarWebviewProvider {
     async insertCodeIntoEditor(code, title) {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            // If no editor is open, offer to create one!
             await this.createScratchTestFile(this._currentLanguageId);
             return;
         }

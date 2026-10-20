@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RealTimeCompletionProvider = void 0;
 const vscode = __importStar(require("vscode"));
 const languages_1 = require("../data/languages");
+const CustomTipsManager_1 = require("../data/CustomTipsManager");
 class RealTimeCompletionProvider {
     provideCompletionItems(document, position, token, context) {
         const lang = (0, languages_1.getLanguageByVsCodeId)(document.languageId);
@@ -44,7 +45,10 @@ class RealTimeCompletionProvider {
         }
         const linePrefix = document.lineAt(position).text.substring(0, position.character).toLowerCase();
         const items = [];
-        for (const snippet of lang.snippets) {
+        // Combine built-in snippets with user custom tips
+        const customTips = CustomTipsManager_1.CustomTipsManager.getInstance() ? CustomTipsManager_1.CustomTipsManager.getInstance().getCustomTips(lang.id) : [];
+        const allSnippets = [...customTips, ...lang.snippets];
+        for (const snippet of allSnippets) {
             // 1. Direct trigger completion (e.g. "java-string-pool" or "py-list-comprehension")
             const triggerItem = this.createCompletionItem(snippet.completionTrigger || snippet.id, snippet, lang.name, vscode.CompletionItemKind.Snippet, `📘 [Syntax Mentor] ${snippet.title}`);
             items.push(triggerItem);

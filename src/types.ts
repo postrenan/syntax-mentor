@@ -98,6 +98,7 @@ export const CATEGORIES: CategoryInfo[] = [
 
 export interface DidacticSnippet {
   id: string;
+  languageId?: string; // Linguagem associada (especialmente para tips customizados)
   title: string;
   summary: string;
   category: CategoryKey;
@@ -110,6 +111,8 @@ export interface DidacticSnippet {
   commonPitfalls?: string[];
   completionTrigger?: string;
   keywords: string[];
+  isCustom?: boolean; // Indica se foi criado pelo usuário
+  createdAt?: number;
 }
 
 export interface LanguageDefinition {
